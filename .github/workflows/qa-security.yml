@@ -39,7 +39,7 @@ jobs:
       - name: Bandit
         run: |
           cd apps/api
-          bandit -r . -x apps/api/tests
+          bandit -r main.py app/
       - name: pip-audit
         run: |
           cd apps/api
@@ -54,7 +54,7 @@ jobs:
       - name: Build API image
         run: docker build -t booking-api:ci apps/api
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@v0.22.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: booking-api:ci
           severity: HIGH,CRITICAL
