@@ -60,8 +60,10 @@ jobs:
       - name: Build API image
         run: docker build -t booking-api:ci apps/api
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.30.0
         with:
           image-ref: booking-api:ci
           severity: HIGH,CRITICAL
           exit-code: "1"
+      - name: Trivy version (debug)
+        run: trivy --version
