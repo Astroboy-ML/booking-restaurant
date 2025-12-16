@@ -2,12 +2,8 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
-from apps.api.app.db.repository import (
-    DatabaseUnavailable,
-    get_database_url,
-    initialize_schema,
-)
-from apps.api.main import app
+from app.db.repository import DatabaseUnavailable, get_database_url, initialize_schema
+from main import app
 
 
 def ensure_db_or_skip() -> None:
