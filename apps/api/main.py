@@ -3,7 +3,6 @@ import logging
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import List
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
@@ -95,7 +94,12 @@ class Reservation(ReservationCreate):
     id: int
 
 
-@app.post("/reservations", response_model=Reservation, status_code=201, tags=["reservations"])
+@app.post(
+    "/reservations",
+    response_model=Reservation,
+    status_code=201,
+    tags=["reservations"],
+)
 async def create_reservation(
     payload: ReservationCreate, repo: ReservationRepository = Depends(get_repository)
 ) -> Reservation:
@@ -106,7 +110,9 @@ async def create_reservation(
 
 
 @app.get("/reservations", response_model=list[Reservation], tags=["reservations"])
-async def list_reservations(repo: ReservationRepository = Depends(get_repository)) -> list[Reservation]:
+async def list_reservations(
+    repo: ReservationRepository = Depends(get_repository),
+) -> list[Reservation]:
     """List reservations from the database, ordered by id ASC."""
     rows = repo.list()
     return [Reservation(**row) for row in rows]

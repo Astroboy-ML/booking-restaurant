@@ -53,6 +53,18 @@ Terraform (phase AWS)
 - Exécuter les tests : `python -m pytest apps/api/tests`
 - Les tests marqués `integration` sont skippés automatiquement si la DB est indisponible : `python -m pytest apps/api/tests -m integration`
 
+## Qualité / Sécurité (local)
+- Installer les dépendances dev : `py -m pip install -r apps/api/requirements.txt -r apps/api/requirements-dev.txt` (ou `python -m pip ...`)
+- Installer pre-commit : `py -m pre-commit install`
+- Lancer Ruff (lint + format check) :  
+  `cd apps/api && ruff check .`  
+  `cd apps/api && ruff format --check .`
+- Lancer Bandit : `cd apps/api && bandit -r . -c pyproject.toml`
+- Lancer pip-audit : `cd apps/api && pip-audit -r requirements.txt`
+- (Optionnel) Trivy image locale :  
+  `docker build -t booking-api:ci apps/api`  
+  `trivy image --severity HIGH,CRITICAL --exit-code 1 booking-api:ci`
+
 ## Déploiement local sur kind (API + Postgres)
 Prérequis : Docker, kind, kubectl.
 

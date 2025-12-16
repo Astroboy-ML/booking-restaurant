@@ -1,5 +1,5 @@
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 from app.db.repository import DatabaseUnavailable, initialize_schema
 from main import app
