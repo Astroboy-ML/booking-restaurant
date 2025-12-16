@@ -41,11 +41,11 @@ jobs:
           cd apps/api
           bandit --version
           pwd
-          ls
+          ls -la
       - name: Bandit
         run: |
           cd apps/api
-          bandit -r . -x tests
+          bandit -r app main.py
       - name: pip-audit
         run: |
           cd apps/api
