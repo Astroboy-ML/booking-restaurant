@@ -1,0 +1,76 @@
+name: kind-smoke
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r apps/api/requirements.txt
+
+      - name: Run API tests
+        run: python -m pytest apps/api/tests
+
+      - name: Install kind and kubectl
+        run: |
+          KIND_VERSION="v0.23.0"
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+          curl -Lo /tmp/kubectl https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+          chmod +x /tmp/kubectl
+          sudo mv /tmp/kubectl /usr/local/bin/kubectl
+
+      - name: Create kind cluster
+        run: kind create cluster --name booking-ci
+
+      - name: Build API image
+        run: docker build -t booking-api:local apps/api
+
+      - name: Load image into kind
+        run: kind load docker-image booking-api:local --name booking-ci
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -k k8s
+
+      - name: Wait for deployments
+        run: |
+          kubectl rollout status deploy/postgres -n booking --timeout=120s
+          kubectl rollout status deploy/api -n booking --timeout=180s
+          kubectl wait --for=condition=Ready pod -l app=api -n booking --timeout=180s
+
+      - name: Smoke test /health
+        run: |
+          kubectl port-forward -n booking svc/api 8000:8000 >/tmp/port-forward.log 2>&1 &
+          PF_PID=$!
+          sleep 3
+          curl -f http://localhost:8000/health
+          kill $PF_PID || true
+          wait $PF_PID 2>/dev/null || true
+
+      - name: Debug info on failure
+        if: failure()
+        run: |
+          kubectl get pods -n booking -o wide || true
+          kubectl describe pod -l app=api -n booking || true
+          kubectl logs -l app=api -n booking --all-containers=true --tail=200 || true
+
+      - name: Cleanup kind cluster
+        if: always()
+        run: kind delete cluster --name booking-ci
