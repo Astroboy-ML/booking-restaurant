@@ -46,7 +46,7 @@ Terraform (phase AWS)
 - Arrêter : `docker compose down`
 - L’API expose `/health`.
 - La connexion utilise `DATABASE_URL` (par défaut `postgresql://booking:booking@db:5432/booking` en compose).
-- Endpoints principaux : `POST /reservations` (création), `GET /reservations` (liste, trié par id asc).
+- Endpoints principaux : `POST /reservations` (création), `GET /reservations` (liste, trié par id asc), `DELETE /reservations/{id}` (204 ou 404 si absent).
 
 ## Tests API (pytest)
 - Installer les dépendances : `pip install -r apps/api/requirements.txt`

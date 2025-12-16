@@ -73,3 +73,33 @@ def test_list_reservations_returns_created_items(client: TestClient):
     ids = [item["id"] for item in list_response.json()]
     assert r1.json()["id"] in ids
     assert r2.json()["id"] in ids
+
+
+@pytest.mark.integration
+def test_delete_reservation_then_absent_in_get(client: TestClient):
+    create_response = client.post(
+        "/reservations",
+        json={
+            "name": "To Delete",
+            "date_time": "2025-01-03T18:00:00Z",
+            "party_size": 2,
+        },
+    )
+    assert create_response.status_code == 201
+    created_id = create_response.json()["id"]
+
+    delete_response = client.delete(f"/reservations/{created_id}")
+    assert delete_response.status_code == 204
+    assert delete_response.text == ""
+
+    list_response = client.get("/reservations")
+    assert list_response.status_code == 200
+    ids = [item["id"] for item in list_response.json()]
+    assert created_id not in ids
+
+
+@pytest.mark.integration
+def test_delete_nonexistent_returns_404(client: TestClient):
+    response = client.delete("/reservations/999999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Reservation not found"

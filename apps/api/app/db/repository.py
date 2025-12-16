@@ -25,6 +25,9 @@ class ReservationRepository(Protocol):
     def list(self) -> list[dict]:
         ...
 
+    def delete(self, reservation_id: int) -> bool:
+        ...
+
 
 def get_database_url() -> str:
     return os.getenv("DATABASE_URL", "postgresql://booking:booking@localhost:5432/booking")
@@ -70,6 +73,15 @@ class PostgresReservationRepository:
                     """
                 )
                 return cur.fetchall()
+
+    def delete(self, reservation_id: int) -> bool:
+        with psycopg.connect(self.dsn, autocommit=True) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM reservations WHERE id = %s",
+                    (reservation_id,),
+                )
+                return cur.rowcount > 0
 
 
 def get_repository() -> ReservationRepository:

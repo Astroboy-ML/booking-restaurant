@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
 from apps.api.app.db.repository import (
@@ -57,6 +57,20 @@ async def list_reservations(repo: ReservationRepository = Depends(get_repository
     """List reservations from the database, ordered by id ASC."""
     rows = repo.list()
     return [Reservation(**row) for row in rows]
+
+
+@app.delete(
+    "/reservations/{reservation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["reservations"],
+)
+async def delete_reservation(
+    reservation_id: int, repo: ReservationRepository = Depends(get_repository)
+) -> None:
+    """Delete a reservation; returns 204 on success, 404 if not found."""
+    deleted = repo.delete(reservation_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
 
 
 if __name__ == "__main__":
