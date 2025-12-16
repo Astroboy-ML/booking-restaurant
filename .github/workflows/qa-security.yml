@@ -36,10 +36,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r apps/api/requirements.txt -r apps/api/requirements-dev.txt
+      - name: Bandit debug info
+        run: |
+          cd apps/api
+          bandit --version
+          pwd
+          ls
       - name: Bandit
         run: |
           cd apps/api
-          bandit -r main.py app/
+          bandit -r . -x tests
       - name: pip-audit
         run: |
           cd apps/api
