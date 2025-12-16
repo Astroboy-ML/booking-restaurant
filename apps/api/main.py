@@ -1,10 +1,29 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel, Field
 
-app = FastAPI(title="Booking Restaurant API")
+from apps.api.app.db.repository import (
+    DatabaseUnavailable,
+    ReservationRepository,
+    get_repository,
+    initialize_schema,
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        initialize_schema()
+    except DatabaseUnavailable as exc:
+        # In dev, we prefer surfacing the init error clearly.
+        raise RuntimeError("Database initialization failed") from exc
+    yield
+
+
+app = FastAPI(title="Booking Restaurant API", lifespan=lifespan)
 
 
 @app.get("/health", tags=["health"])
@@ -23,27 +42,14 @@ class Reservation(ReservationCreate):
     id: int
 
 
-class InMemoryReservationStore:
-    """Dedicated in-memory store to allow later replacement by a real DB."""
-
-    def __init__(self) -> None:
-        self._reservations: List[Reservation] = []
-        self._next_id: int = 1
-
-    def create(self, data: ReservationCreate) -> Reservation:
-        reservation = Reservation(id=self._next_id, **data.model_dump())
-        self._next_id += 1
-        self._reservations.append(reservation)
-        return reservation
-
-
-store = InMemoryReservationStore()
-
-
 @app.post("/reservations", response_model=Reservation, status_code=201, tags=["reservations"])
-async def create_reservation(payload: ReservationCreate) -> Reservation:
-    """Create a reservation; uses in-memory store so it is independent of the DB."""
-    return store.create(payload)
+async def create_reservation(
+    payload: ReservationCreate, repo: ReservationRepository = Depends(get_repository)
+) -> Reservation:
+    """Create a reservation using the database-backed repository."""
+    created = repo.create(payload)
+    # psycopg returns datetime objects; pydantic model will handle them on response.
+    return Reservation(**created)
 
 
 if __name__ == "__main__":

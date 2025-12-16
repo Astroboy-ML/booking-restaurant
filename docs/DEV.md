@@ -44,11 +44,13 @@ Terraform (phase AWS)
 ## Démarrage rapide API (compose)
 - Lancer Postgres + API : `docker compose up --build api db`
 - Arrêter : `docker compose down`
-- L’API expose `/health` et doit répondre même si Postgres est indisponible.
+- L’API expose `/health`.
+- La connexion utilise `DATABASE_URL` (par défaut `postgresql://booking:booking@db:5432/booking` en compose).
 
 ## Tests API (pytest)
 - Installer les dépendances : `pip install -r apps/api/requirements.txt`
 - Exécuter les tests : `python -m pytest apps/api/tests`
+- Les tests marqués `integration` sont skippés automatiquement si la DB est indisponible : `python -m pytest apps/api/tests -m integration`
 
 ## Conventions
 - Toute nouvelle commande de dev doit être ajoutée ici.
