@@ -46,3 +46,30 @@ def test_create_reservation_persists_in_db(client: TestClient):
     assert response.status_code == 201
     assert "id" in response.json()
     assert after == before + 1
+
+
+@pytest.mark.integration
+def test_list_reservations_returns_created_items(client: TestClient):
+    payload1 = {
+        "name": "List Test 1",
+        "date_time": "2025-01-01T19:00:00Z",
+        "party_size": 2,
+    }
+    payload2 = {
+        "name": "List Test 2",
+        "date_time": "2025-01-02T20:00:00Z",
+        "party_size": 4,
+    }
+
+    r1 = client.post("/reservations", json=payload1)
+    r2 = client.post("/reservations", json=payload2)
+
+    assert r1.status_code == 201
+    assert r2.status_code == 201
+
+    list_response = client.get("/reservations")
+    assert list_response.status_code == 200
+
+    ids = [item["id"] for item in list_response.json()]
+    assert r1.json()["id"] in ids
+    assert r2.json()["id"] in ids

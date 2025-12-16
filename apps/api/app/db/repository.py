@@ -22,6 +22,9 @@ class ReservationRepository(Protocol):
     def create(self, data: ReservationCreateDTO) -> dict:
         ...
 
+    def list(self) -> list[dict]:
+        ...
+
 
 def get_database_url() -> str:
     return os.getenv("DATABASE_URL", "postgresql://booking:booking@localhost:5432/booking")
@@ -55,6 +58,18 @@ class PostgresReservationRepository:
                     (data.name, data.date_time, data.party_size),
                 )
                 return cur.fetchone()
+
+    def list(self) -> list[dict]:
+        with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id, name, date_time, party_size
+                    FROM reservations
+                    ORDER BY id ASC
+                    """
+                )
+                return cur.fetchall()
 
 
 def get_repository() -> ReservationRepository:

@@ -52,6 +52,13 @@ async def create_reservation(
     return Reservation(**created)
 
 
+@app.get("/reservations", response_model=list[Reservation], tags=["reservations"])
+async def list_reservations(repo: ReservationRepository = Depends(get_repository)) -> list[Reservation]:
+    """List reservations from the database, ordered by id ASC."""
+    rows = repo.list()
+    return [Reservation(**row) for row in rows]
+
+
 if __name__ == "__main__":
     import uvicorn
 
