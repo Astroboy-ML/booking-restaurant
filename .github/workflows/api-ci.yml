@@ -31,4 +31,5 @@ jobs:
           fi
 
       - name: Test API
-        run: python -m pytest apps/api/tests
+        working-directory: apps/api
+        run: python -m pytest tests -q

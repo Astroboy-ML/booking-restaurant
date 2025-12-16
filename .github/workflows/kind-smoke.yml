@@ -25,7 +25,8 @@ jobs:
           python -m pip install -r apps/api/requirements.txt
 
       - name: Run API tests
-        run: python -m pytest apps/api/tests
+        working-directory: apps/api
+        run: python -m pytest tests -q
 
       - name: Install kind and kubectl
         run: |
