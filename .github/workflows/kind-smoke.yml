@@ -54,6 +54,7 @@ jobs:
         run: |
           kubectl rollout status deploy/postgres -n booking --timeout=120s
           kubectl rollout status deploy/api -n booking --timeout=180s
+          kubectl wait --for=condition=Ready pod -l app=postgres -n booking --timeout=180s
           kubectl wait --for=condition=Ready pod -l app=api -n booking --timeout=180s
 
       - name: Smoke test /health
@@ -71,6 +72,9 @@ jobs:
           kubectl get pods -n booking -o wide || true
           kubectl describe pod -l app=api -n booking || true
           kubectl logs -l app=api -n booking --all-containers=true --tail=200 || true
+          kubectl get endpoints api -n booking || true
+          kubectl get ingress -n booking || true
+          kubectl -n ingress-nginx logs deploy/ingress-nginx-controller --tail=200 || true
 
       - name: Cleanup kind cluster
         if: always()

@@ -9,3 +9,4 @@ resources:
   - api/secret.yaml
   - api/deployment.yaml
   - api/service.yaml
+  - ingress/ingress.yaml
