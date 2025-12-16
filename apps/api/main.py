@@ -1,8 +1,13 @@
+import json
+import logging
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List
+from uuid import uuid4
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
 from app.db.repository import (
@@ -24,6 +29,54 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Booking Restaurant API", lifespan=lifespan)
+instrumentator = Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
+logger = logging.getLogger("booking_api")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
+logger.propagate = False
+
+
+@app.middleware("http")
+async def add_request_id_and_log(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid4()))
+    start_time = time.perf_counter()
+    try:
+        response: Response = await call_next(request)
+    except Exception:
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        logger.exception(
+            json.dumps(
+                {
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "level": "ERROR",
+                    "path": request.url.path,
+                    "method": request.method,
+                    "status_code": 500,
+                    "duration_ms": round(duration_ms, 2),
+                    "request_id": request_id,
+                }
+            )
+        )
+        raise
+
+    duration_ms = (time.perf_counter() - start_time) * 1000
+    log_payload = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "level": "INFO",
+        "path": request.url.path,
+        "method": request.method,
+        "status_code": response.status_code,
+        "duration_ms": round(duration_ms, 2),
+        "request_id": request_id,
+    }
+    logger.info(json.dumps(log_payload))
+    response.headers["X-Request-ID"] = request_id
+    request.state.request_id = request_id
+    return response
 
 
 @app.get("/health", tags=["health"])

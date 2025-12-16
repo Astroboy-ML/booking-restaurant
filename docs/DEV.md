@@ -85,6 +85,7 @@ Attendre que le contrôleur soit Ready :
 `curl http://localhost/health`  
 `curl -X POST http://localhost/reservations -H "Content-Type: application/json" -d '{"name":"Bob","date_time":"2025-01-01T19:00:00Z","party_size":2}'`  
 `curl http://localhost/reservations`
+`curl http://localhost/metrics`  # endpoint Prometheus, ne pas exposer en prod
 
 > Note Windows (PowerShell) : l'alias `curl` pointe vers `Invoke-WebRequest`. Utilisez `curl.exe` ou `Invoke-RestMethod` pour tester `/health` et les endpoints JSON.
 
