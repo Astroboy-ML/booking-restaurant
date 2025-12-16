@@ -5,7 +5,7 @@ from typing import List
 from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
-from apps.api.app.db.repository import (
+from app.db.repository import (
     DatabaseUnavailable,
     ReservationRepository,
     get_repository,
