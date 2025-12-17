@@ -51,14 +51,14 @@ try {
 }
 Pop-Location
 
-# 4) Lancer l'API en mode reload
+# 4) Lancer l'API en mode reload (python -m uvicorn pour fiabiliser le PATH)
 Write-Host "[dev] Lancement de l'API (uvicorn --reload sur port $ApiPort)..."
 $apiJob = Start-Job -ScriptBlock {
   param($port, $dbUrl)
   $ErrorActionPreference = "Stop"
   $env:DATABASE_URL = $dbUrl
   Set-Location "$PSScriptRoot/../apps/api"
-  uvicorn main:app --host 0.0.0.0 --port $port --reload
+  python -m uvicorn main:app --host 0.0.0.0 --port $port --reload
 } -ArgumentList $ApiPort, $env:DATABASE_URL
 
 # 5) Lancer le front Vite en mode dev
@@ -76,5 +76,8 @@ Write-Host "  Web : http://localhost:$WebPort" -ForegroundColor Green
 Write-Host "  DB  : localhost:5432 (user=booking password=booking db=booking)" -ForegroundColor Green
 Write-Host "[dev] Arrêt : Ctrl+C puis nettoyer les jobs PowerShell si nécessaire (Get-Job | Remove-Job)."
 
-# Garder la session ouverte tant qu'un job tourne
-Wait-Job -Any $apiJob, $webJob | Out-Null
+# Garder la session ouverte tant que les jobs tournent et afficher leurs logs si l'un termine
+Wait-Job $apiJob, $webJob
+Write-Host "[dev] Un des jobs s'est terminé, affichage des logs :" -ForegroundColor Yellow
+Receive-Job $apiJob -Keep
+Receive-Job $webJob -Keep
