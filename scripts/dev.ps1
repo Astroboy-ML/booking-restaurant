@@ -1,0 +1,52 @@
+﻿param(
+  [string]$ApiPort = "8000",
+  [string]$WebPort = "5173"
+)
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "[dev] Démarrage de l'environnement..." -ForegroundColor Cyan
+
+# 1) Démarrer Postgres via docker compose
+Write-Host "[dev] Démarrage de la base (docker compose up -d db)..."
+docker compose up -d db
+
+# 2) Préparer la variable DATABASE_URL si absente
+if (-not $env:DATABASE_URL) {
+  $env:DATABASE_URL = "postgresql://booking:booking@localhost:5432/booking"
+  Write-Host "[dev] DATABASE_URL non défini, utilisation de $env:DATABASE_URL"
+}
+
+# 3) Appliquer les migrations
+Write-Host "[dev] Application des migrations Alembic..."
+Push-Location apps/api
+alembic -c alembic.ini upgrade head
+Pop-Location
+
+# 4) Lancer l'API en mode reload
+Write-Host "[dev] Lancement de l'API (uvicorn --reload sur port $ApiPort)..."
+$apiJob = Start-Job -ScriptBlock {
+  param($port, $dbUrl)
+  $ErrorActionPreference = "Stop"
+  $env:DATABASE_URL = $dbUrl
+  Set-Location "$PSScriptRoot/../apps/api"
+  uvicorn main:app --host 0.0.0.0 --port $port --reload
+} -ArgumentList $ApiPort, $env:DATABASE_URL
+
+# 5) Lancer le front Vite en mode dev
+Write-Host "[dev] Lancement du front (npm run dev -- --host --port $WebPort)..."
+$webJob = Start-Job -ScriptBlock {
+  param($port)
+  $ErrorActionPreference = "Stop"
+  Set-Location "$PSScriptRoot/../apps/web"
+  npm run dev -- --host --port $port
+} -ArgumentList $WebPort
+
+Write-Host "[dev] URLs :" -ForegroundColor Green
+Write-Host "  API : http://localhost:$ApiPort" -ForegroundColor Green
+Write-Host "  Web : http://localhost:$WebPort" -ForegroundColor Green
+Write-Host "  DB  : localhost:5432 (user=booking password=booking db=booking)" -ForegroundColor Green
+Write-Host "[dev] Arrêt : Ctrl+C puis nettoyer les jobs PowerShell si nécessaire (Get-Job | Remove-Job)."
+
+# Garder la session ouverte tant qu'un job tourne
+Wait-Job -Any $apiJob, $webJob | Out-Null

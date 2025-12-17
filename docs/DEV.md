@@ -20,6 +20,7 @@ API
 - Lint : `make api-lint`  
 - Tests : `make api-test`  
 - Migrations : `make api-migrate`
+- Dev complet (DB + API + Web) : `make dev` (démarre Postgres via docker compose, applique les migrations, lance uvicorn --reload et Vite)
 
 Web  
 - Lint : `make web-lint`  
@@ -140,6 +141,7 @@ Attendre que le contrôleur soit Ready :
 ## Conventions
 - Toute nouvelle commande de dev doit être ajoutée ici.
 - Toute étape de « mise en route » doit être reproductible depuis un repo propre.
+ - `make dev` : démarre DB docker compose, applique les migrations Alembic, lance l'API (uvicorn --reload) et le front (Vite --host) avec affichage des URLs.
 
 ## Debug
 - Logs K8s :

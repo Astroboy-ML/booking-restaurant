@@ -1,4 +1,4 @@
-.PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision docker-up docker-down
+.PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision docker-up docker-down dev
 
 web-lint:
 	cd apps/web && npm run lint
@@ -26,3 +26,6 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+dev:
+	powershell -ExecutionPolicy Bypass -File scripts/dev.ps1
