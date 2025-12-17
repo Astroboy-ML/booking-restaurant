@@ -34,7 +34,7 @@ docker compose up -d db
 
 # 2) Préparer la variable DATABASE_URL si absente
 if (-not $env:DATABASE_URL) {
-  $env:DATABASE_URL = "postgresql://booking:booking@localhost:5432/booking"
+  $env:DATABASE_URL = "postgresql+psycopg://booking:booking@localhost:5432/booking"
   Write-Host "[dev] DATABASE_URL non défini, utilisation de $env:DATABASE_URL"
 }
 
