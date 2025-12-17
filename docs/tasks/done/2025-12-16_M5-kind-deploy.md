@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M5-kind-deploy"
 title: "M5 Deploiement local kind"
 type: feature

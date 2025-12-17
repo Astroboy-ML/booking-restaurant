@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M0-foundation"
 title: "M0 Foundation (health, compose, CI)"
 type: feature

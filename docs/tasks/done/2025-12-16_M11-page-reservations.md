@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M11-page-reservations"
 title: "M11 Page reservations (client)"
 type: feature

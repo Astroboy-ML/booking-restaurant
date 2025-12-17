@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M10-bootstrap-web"
 title: "M10 Bootstrap web"
 type: feature

@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M3-list-reservations"
 title: "M3 Lister les reservations"
 type: feature

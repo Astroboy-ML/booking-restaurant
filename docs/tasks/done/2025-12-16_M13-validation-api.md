@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M13-validation-api"
 title: "M13 Validation API renforcee"
 type: feature

@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M1-create-reservation"
 title: "M1 Creation de reservation"
 type: feature

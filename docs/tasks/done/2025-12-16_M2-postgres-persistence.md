@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M2-postgres-persistence"
 title: "M2 Persistance Postgres"
 type: feature

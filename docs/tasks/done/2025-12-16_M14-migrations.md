@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M14-migrations"
 title: "M14 Migrations initiales (restaurants + reservations)"
 type: feature

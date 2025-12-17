@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M4-cancel-reservation"
 title: "M4 Annuler une reservation"
 type: feature

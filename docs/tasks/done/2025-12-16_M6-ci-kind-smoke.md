@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M6-ci-kind-smoke"
 title: "M6 CI kind smoke"
 type: feature

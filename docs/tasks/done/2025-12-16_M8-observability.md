@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M8-observability"
 title: "M8 Observabilite"
 type: feature

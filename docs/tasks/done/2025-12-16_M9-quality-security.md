@@ -1,4 +1,4 @@
-﻿---
+---
 id: "2025-12-16_M9-quality-security"
 title: "M9 Qualite et securite"
 type: feature
