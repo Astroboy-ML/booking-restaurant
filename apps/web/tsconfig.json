@@ -14,5 +14,6 @@
     "types": ["vitest", "vite/client"]
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["src/setupTests.ts", "src/**/*.test.ts", "src/**/*.test.tsx"],
+  "references": []
 }

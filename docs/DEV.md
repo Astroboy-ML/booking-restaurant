@@ -77,6 +77,18 @@ Terraform (phase AWS)
 - Tests watch : `cd apps/web && npm run test:watch`.  
 - Build : `make web-build` ou `cd apps/web && npm run build`.
 
+### Appels API front (reservations)
+- Base URL : `VITE_API_URL` (ex: `http://localhost:8000`).
+- Endpoints utilises : `GET /reservations`, `POST /reservations`.
+- Payload POST attendu (datetime tel que saisi dans le champ `datetime-local`, pas de conversion automatique) :
+  ```json
+  {
+    "name": "Alice",
+    "date_time": "2025-01-01T19:00",
+    "party_size": 2
+  }
+  ```
+
 > Déploiement statique : l’app utilise `BrowserRouter`. Prévoir un fallback vers `index.html` sur toutes les routes (`/client`, `/restaurateur`) pour éviter les 404 en refresh côté serveur/CDN.
 
 ## Déploiement local sur kind (API + Postgres)
