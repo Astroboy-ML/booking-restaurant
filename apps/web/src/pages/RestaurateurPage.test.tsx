@@ -10,10 +10,14 @@ vi.mock("../config", () => ({
 import RestaurateurPage from "./RestaurateurPage";
 
 function jsonResponse(body: unknown, init?: ResponseInit) {
+  const status = init?.status ?? 200;
+  // For 204, Response must not have a body.
+  const payload = status === 204 ? null : JSON.stringify(body);
+  const headers = status === 204 ? undefined : { "Content-Type": "application/json" };
   return Promise.resolve(
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    new Response(payload, {
+      status,
+      headers,
       ...init
     })
   );
