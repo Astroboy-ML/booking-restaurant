@@ -20,6 +20,19 @@ Règle de déplacement : toujours utiliser `git mv docs/tasks/todo/<ticket>.md d
 ## Format obligatoire des tickets
 - Basé sur `docs/tasks/_template.md` avec front-matter YAML (id, title, type, area, agents_required, depends_on, validated_by, validated_at) et sections normalisées (Contexte, Objectif, Hors scope, Scope technique, Contraintes, Deliverables, Critères d’acceptation, Comment tester, Plan, À contrôler).
 
+## Ticket lifecycle (automatique)
+
+Quand l’agent annonce "Finished working" / "Prêt à tester" ET que :
+Une fois que l'agent a terminé ses correction ALORS l’agent DOIT :
+1) déplacer le ticket vers `docs/tasks/in-progress/` via git :
+   - `git mv {TICKET_PATH} docs/tasks/in-progress/`
+2) committer ce déplacement dans le même commit (ou un commit dédié) et inclure le chemin dans le résumé.
+
+Sinon (tests non exécutés / incertitude), l’agent NE DOIT PAS déplacer le ticket et doit indiquer explicitement ce qu’il manque.
+Tous les fichiers texte commités doivent être en UTF-8.
+L’agent doit vérifier l’encodage du ticket (et des docs modifiées) avant commit.
+Si du mojibake est détecté (ex: "dÇ¸faut", "rÇ¸servations"), l’agent doit corriger avant de pousser.
+
 ## Format obligatoire “À contrôler” (sortie IA)
 - Liste des points à vérifier par l’humain (tests, captures éventuelles, scénarios manuels).
 - Emplacement : section “À contrôler” du ticket, mise à jour par l’agent implémenteur.
