@@ -15,14 +15,14 @@ from app.db.repository import (
     DatabaseUnavailable,
     ReservationRepository,
     get_repository,
-    initialize_schema,
+    run_migrations,
 )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        initialize_schema()
+        run_migrations()
     except DatabaseUnavailable as exc:
         # In dev, we prefer surfacing the init error clearly.
         raise RuntimeError("Database initialization failed") from exc

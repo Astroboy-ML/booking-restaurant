@@ -3,9 +3,13 @@ from pathlib import Path
 from typing import Protocol
 
 import psycopg
+from alembic import command
+from alembic.config import Config
 from psycopg.rows import dict_row
 
-SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+ALEMBIC_CONFIG_PATH = Path(__file__).resolve().parents[2] / "alembic.ini"
+MIGRATIONS_PATH = Path(__file__).resolve().parent / "migrations"
+DEFAULT_URL = "postgresql+psycopg://booking:booking@localhost:5432/booking"
 
 
 class DatabaseUnavailable(Exception):
@@ -27,17 +31,45 @@ class ReservationRepository(Protocol):
 
 
 def get_database_url() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://booking:booking@localhost:5432/booking")
+    """
+    Return a psycopg-compatible DSN (no driver suffix).
+
+    - Accepts env var DATABASE_URL.
+    - If URL uses the SQLAlchemy-style driver suffix (`postgresql+psycopg://`),
+      convert it to `postgresql://` for psycopg.connect.
+    """
+    url = os.getenv("DATABASE_URL", DEFAULT_URL)
+    if url.startswith("postgresql+psycopg://"):
+        return url.replace("postgresql+psycopg://", "postgresql://", 1)
+    return url
+
+
+def get_alembic_url() -> str:
+    """
+    Return an SQLAlchemy-compatible URL for Alembic.
+
+    Ensures the psycopg driver suffix is present for SQLAlchemy if missing.
+    """
+    url = os.getenv("DATABASE_URL", DEFAULT_URL)
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
+
+def run_migrations() -> None:
+    """Apply database migrations up to head."""
+    try:
+        config = Config(str(ALEMBIC_CONFIG_PATH))
+        config.set_main_option("sqlalchemy.url", get_alembic_url())
+        config.set_main_option("script_location", str(MIGRATIONS_PATH))
+        command.upgrade(config, "head")
+    except Exception as exc:
+        raise DatabaseUnavailable("Could not apply database migrations") from exc
 
 
 def initialize_schema() -> None:
-    """Ensure the reservations table exists (idempotent)."""
-    try:
-        with psycopg.connect(get_database_url(), autocommit=True) as conn:
-            with conn.cursor() as cur:
-                cur.execute(SCHEMA_PATH.read_text())
-    except Exception as exc:
-        raise DatabaseUnavailable("Could not initialize database schema") from exc
+    """Backward-compatible helper to ensure the schema is present."""
+    run_migrations()
 
 
 class PostgresReservationRepository:

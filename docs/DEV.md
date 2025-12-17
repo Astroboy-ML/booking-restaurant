@@ -18,7 +18,8 @@ Objectif : standardiser via Makefile (ou scripts si nécessaire sur Windows).
 
 API  
 - Lint : `make api-lint`  
-- Tests : `make api-test`
+- Tests : `make api-test`  
+- Migrations : `make api-migrate`
 
 Web  
 - Lint : `make web-lint`  
@@ -46,9 +47,18 @@ Terraform (phase AWS)
 - Lancer Postgres + API : `docker compose up --build api db`
 - Arrêter : `docker compose down`
 - L’API expose `/health`.
-- La connexion utilise `DATABASE_URL` (par défaut `postgresql://booking:booking@db:5432/booking` en compose).
+- La connexion utilise `DATABASE_URL` (par défaut `postgresql+psycopg://booking:booking@db:5432/booking` en compose).
 - Endpoints principaux : `POST /reservations` (création), `GET /reservations` (liste, trié par id asc), `DELETE /reservations/{id}` (204 ou 404 si absent).
 - Uvicorn : par défaut `UVICORN_HOST` vaut `127.0.0.1` pour les runs locaux ; en container, définis `UVICORN_HOST=0.0.0.0` pour écouter sur toutes les interfaces.
+
+## Migrations Postgres (Alembic)
+- Compose : les migrations Alembic sont appliquées automatiquement avant de lancer l’API.
+- Appliquer toutes les migrations (dev/CI) : `make api-migrate` (ou `cd apps/api && alembic -c alembic.ini upgrade head`).
+- Créer une nouvelle révision (nom court + identifiant explicite) :  
+  `make api-migrate-revision m="add new field" rev="202512171300"`  
+  puis `make api-migrate`.
+- Valeur par défaut : une entrée `restaurants` avec `id=1`, `name='Default Restaurant'` est créée lors de la migration initiale ; les réservations utilisent `restaurant_id` par défaut `1` (pas de seed supplémentaire).
+- Reset local rapide : `docker compose down -v` pour supprimer les volumes Postgres puis `make api-migrate`.
 
 ## Tests API (pytest)
 - Installer les dépendances : `pip install -r apps/api/requirements.txt`

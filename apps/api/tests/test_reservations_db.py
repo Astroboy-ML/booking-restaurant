@@ -2,13 +2,13 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
-from app.db.repository import DatabaseUnavailable, get_database_url, initialize_schema
+from app.db.repository import DatabaseUnavailable, get_database_url, run_migrations
 from main import app
 
 
 def ensure_db_or_skip() -> None:
     try:
-        initialize_schema()
+        run_migrations()
     except DatabaseUnavailable:
         pytest.skip("Database unavailable for integration test")
 

@@ -1,9 +1,25 @@
-# Ticket: M14 — Baseline migrations PostgreSQL (restaurants + réservations)
+---
+id: "2025-12-16_M14-migrations"
+title: "M14 – Baseline migrations PostgreSQL (restaurants + reservations)"
+type: feature
+area: backend
+agents_required: [backend, devops]
+depends_on: []
+validated_by:
+validated_at:
+---
 
-## But
-Introduire des migrations versionnées pour garantir un schéma reproductible incluant la table `reservations` et un socle `restaurants` pour différencier l’espace restaurateur.
+## Contexte
+Besoin de migrations versionnées pour garantir un schéma Postgres reproductible et faire cohabiter un socle `restaurants` avec les réservations existantes.
 
-## Scope
+## Objectif
+Introduire une première migration qui crée les tables `restaurants` et `reservations` (FK) avec un flux reproductible via une commande standard.
+
+## Hors scope
+- Refonte complète du modèle au-delà du MVP.
+- Seed supplémentaire autre qu’un restaurant par défaut documenté pour le dev.
+
+## Scope technique
 - apps/api/ (config Alembic ou équivalent)
 - docker-compose.yml (commande init)
 - docs/DEV.md (section migrations)
@@ -23,7 +39,21 @@ Introduire des migrations versionnées pour garantir un schéma reproductible in
 - [ ] Les tests d’intégration DB passent toujours après migration.
 - [ ] docs/DEV.md explique comment lancer les migrations (dev et CI) et le comportement par défaut du restaurant lié.
 
-## Plan proposé
+## Comment tester
+- Lancer `make api-migrate` (ou `cd apps/api && alembic -c alembic.ini upgrade head`) avec une DB Postgres disponible.
+- Exécuter `python -m pytest apps/api/tests -m integration` après migration.
+- Contrôler via psql/GUI que les tables `restaurants` et `reservations` existent avec la FK et le restaurant par défaut documenté.
+- Relire `docs/DEV.md` pour les commandes dev/CI et la valeur par défaut du restaurant.
+
+## Plan
 1) Ajouter la dépendance et la configuration de l’outil de migration.
 2) Générer la migration initiale (tables restaurants + reservations, statut annulé/actif, FK) et brancher la commande dans compose/Makefile.
 3) Documenter le flux complet (init, upgrade, reset) pour dev/CI ainsi que la gestion du restaurant par défaut.
+
+## À contrôler
+- Résumé des changements appliqués.
+- Fichiers modifiés et commits associés.
+- Commandes exécutées (migrations, tests).
+- Checklist AC et résultats observés.
+- Risques/contournements connus.
+- Plan de rollback (ex: downgrade, reset volume).

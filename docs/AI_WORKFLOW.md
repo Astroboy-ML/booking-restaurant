@@ -37,6 +37,14 @@ Si du mojibake est détecté (ex: "dÇ¸faut", "rÇ¸servations"), l’agent doi
 - Liste des points à vérifier par l’humain (tests, captures éventuelles, scénarios manuels).
 - Emplacement : section “À contrôler” du ticket, mise à jour par l’agent implémenteur.
 
+### Règle : pas de demande d’autorisation
+L’agent NE DOIT PAS demander “est-ce que je peux…”.
+Il DOIT exécuter le plan et, s’il est bloqué (ex: DB inaccessible), fournir :
+- le diagnostic
+- les commandes exactes pour reproduire
+- la correction proposée (diff)
+- et l’état du ticket (bloqué / prêt à tester).
+
 ## Table de routage (area → agents)
 - backend/api → backend, qa (selon criticité), security si auth/secrets.
 - frontend/web → frontend, qa.
