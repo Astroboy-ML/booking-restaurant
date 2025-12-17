@@ -8,7 +8,9 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
+from psycopg import Error as PsycopgError
 from pydantic import BaseModel, Field
 
 from app.db.repository import (
@@ -89,6 +91,16 @@ async def add_request_id_and_log(request: Request, call_next):
     return response
 
 
+@app.exception_handler(Exception)
+async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    # Generic fallback: surface a clean JSON payload
+    logger.error("Unhandled error", exc_info=exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal server error"},
+    )
+
+
 @app.get("/health", tags=["health"])
 async def health() -> dict:
     """Simple health endpoint that does not depend on external services."""
@@ -115,7 +127,13 @@ async def create_reservation(
     payload: ReservationCreate, repo: ReservationRepository = Depends(get_repository)
 ) -> Reservation:
     """Create a reservation using the database-backed repository."""
-    created = repo.create(payload)
+    try:
+        created = repo.create(payload)
+    except (DatabaseUnavailable, PsycopgError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
     # psycopg returns datetime objects; pydantic model will handle them on response.
     return Reservation(**created)
 
@@ -125,7 +143,13 @@ async def list_reservations(
     repo: ReservationRepository = Depends(get_repository),
 ) -> list[Reservation]:
     """List reservations from the database, ordered by id ASC."""
-    rows = repo.list()
+    try:
+        rows = repo.list()
+    except (DatabaseUnavailable, PsycopgError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
     return [Reservation(**row) for row in rows]
 
 
@@ -138,7 +162,13 @@ async def delete_reservation(
     reservation_id: int, repo: ReservationRepository = Depends(get_repository)
 ) -> None:
     """Delete a reservation; returns 204 on success, 404 if not found."""
-    deleted = repo.delete(reservation_id)
+    try:
+        deleted = repo.delete(reservation_id)
+    except (DatabaseUnavailable, PsycopgError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
 

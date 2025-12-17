@@ -21,15 +21,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r apps/api/requirements.txt
 
-      - name: Lint (if available)
-        if: ${{ hashFiles('Makefile') != '' }}
-        run: |
-          if make -q api-lint 2>/dev/null; then
-            make api-lint
-          else
-            echo "api-lint target not found, skipping"
-          fi
+      - name: Lint API
+        run: make api-lint
 
       - name: Test API
-        working-directory: apps/api
-        run: python -m pytest tests -q
+        run: make api-test

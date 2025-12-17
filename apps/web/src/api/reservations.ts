@@ -5,6 +5,7 @@ type Reservation = {
   name: string;
   date_time: string;
   party_size: number;
+  status?: string;
 };
 
 type NewReservation = {
