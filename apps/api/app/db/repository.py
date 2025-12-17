@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Protocol
 
 import psycopg
+from psycopg import errors as psycopg_errors
 from alembic import command
 from alembic.config import Config
 from psycopg.rows import dict_row
@@ -79,38 +80,47 @@ class PostgresReservationRepository:
         self.dsn = dsn or get_database_url()
 
     def create(self, data: ReservationCreateDTO) -> dict:
-        with psycopg.connect(self.dsn, autocommit=True, row_factory=dict_row) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO reservations (name, date_time, party_size)
-                    VALUES (%s, %s, %s)
-                    RETURNING id, name, date_time, party_size, created_at
-                    """,
-                    (data.name, data.date_time, data.party_size),
-                )
-                return cur.fetchone()
+        try:
+            with psycopg.connect(self.dsn, autocommit=True, row_factory=dict_row) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO reservations (name, date_time, party_size)
+                        VALUES (%s, %s, %s)
+                        RETURNING id, name, date_time, party_size, status, created_at
+                        """,
+                        (data.name, data.date_time, data.party_size),
+                    )
+                    return cur.fetchone()
+        except psycopg_errors.OperationalError as exc:
+            raise DatabaseUnavailable("Database unavailable") from exc
 
     def list(self) -> list[dict]:
-        with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT id, name, date_time, party_size
-                    FROM reservations
-                    ORDER BY id ASC
-                    """
-                )
-                return cur.fetchall()
+        try:
+            with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT id, name, date_time, party_size, status
+                        FROM reservations
+                        ORDER BY id ASC
+                        """
+                    )
+                    return cur.fetchall()
+        except psycopg_errors.OperationalError as exc:
+            raise DatabaseUnavailable("Database unavailable") from exc
 
     def delete(self, reservation_id: int) -> bool:
-        with psycopg.connect(self.dsn, autocommit=True) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "DELETE FROM reservations WHERE id = %s",
-                    (reservation_id,),
-                )
-                return cur.rowcount > 0
+        try:
+            with psycopg.connect(self.dsn, autocommit=True) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "DELETE FROM reservations WHERE id = %s",
+                        (reservation_id,),
+                    )
+                    return cur.rowcount > 0
+        except psycopg_errors.OperationalError as exc:
+            raise DatabaseUnavailable("Database unavailable") from exc
 
 
 def get_repository() -> ReservationRepository:

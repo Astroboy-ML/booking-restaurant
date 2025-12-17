@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { deleteReservation, getReservations, type Reservation } from "../api/reservations";
 
 function RestaurateurPage() {
@@ -73,6 +73,7 @@ function RestaurateurPage() {
                 </p>
                 <p>Date/heure : {reservation.date_time}</p>
                 <p>Convives : {reservation.party_size}</p>
+                <p>Statut : {reservation.status}</p>
                 <button
                   type="button"
                   onClick={() => void handleDelete(reservation.id)}

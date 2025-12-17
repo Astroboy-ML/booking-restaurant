@@ -143,6 +143,7 @@ function ClientPage() {
                 </p>
                 <p>Date/heure : {reservation.date_time}</p>
                 <p>Convives : {reservation.party_size}</p>
+                <p>Statut : {reservation.status}</p>
               </li>
             ))}
           </ul>

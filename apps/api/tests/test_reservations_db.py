@@ -41,6 +41,7 @@ def test_create_reservation_persists_in_db(client: TestClient):
 
     assert response.status_code == 201
     assert "id" in response.json()
+    assert response.json()["status"] == "active"
     assert after == before + 1
 
 
@@ -69,6 +70,7 @@ def test_list_reservations_returns_created_items(client: TestClient):
     ids = [item["id"] for item in list_response.json()]
     assert r1.json()["id"] in ids
     assert r2.json()["id"] in ids
+    assert all(item["status"] == "active" for item in list_response.json())
 
 
 @pytest.mark.integration

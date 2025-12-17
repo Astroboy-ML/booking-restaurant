@@ -5,6 +5,7 @@ type Reservation = {
   name: string;
   date_time: string;
   party_size: number;
+  status: "active" | "cancelled";
 };
 
 type NewReservation = {
@@ -29,8 +30,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // ignore JSON parse errors
     }
-    const message = details ? `${response.status} ${response.statusText} - ${details}` : `${response.status} ${response.statusText}`;
+    const message = details
+      ? `${response.status} ${response.statusText} - ${details}`
+      : `${response.status} ${response.statusText}`;
     throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return (await response.json()) as T;

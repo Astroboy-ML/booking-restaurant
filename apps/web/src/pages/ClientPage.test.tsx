@@ -27,7 +27,7 @@ describe("ClientPage", () => {
   it("charge la liste au montage", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(
       await jsonResponse([
-        { id: 1, name: "Alice", date_time: "2025-01-01T19:00", party_size: 2 }
+        { id: 1, name: "Alice", date_time: "2025-01-01T19:00", party_size: 2, status: "active" }
       ])
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -44,12 +44,14 @@ describe("ClientPage", () => {
       .mockResolvedValueOnce(await jsonResponse([])) // initial GET
       .mockResolvedValueOnce(
         await jsonResponse(
-          { id: 1, name: "Bob", date_time: "2025-02-02T20:30", party_size: 4 },
+          { id: 1, name: "Bob", date_time: "2025-02-02T20:30", party_size: 4, status: "active" },
           { status: 201 }
         )
       ) // POST
       .mockResolvedValueOnce(
-        await jsonResponse([{ id: 1, name: "Bob", date_time: "2025-02-02T20:30", party_size: 4 }])
+        await jsonResponse([
+          { id: 1, name: "Bob", date_time: "2025-02-02T20:30", party_size: 4, status: "active" }
+        ])
       ); // refreshed GET
     vi.stubGlobal("fetch", fetchMock);
 

@@ -4,8 +4,10 @@ import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
+from enum import Enum
 from uuid import uuid4
 
+import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -95,6 +97,11 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
+class ReservationStatus(str, Enum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+
+
 class ReservationCreate(BaseModel):
     name: str = Field(min_length=1)
     date_time: datetime
@@ -103,6 +110,20 @@ class ReservationCreate(BaseModel):
 
 class Reservation(ReservationCreate):
     id: int
+    status: ReservationStatus
+
+
+def map_repository_error(exc: Exception, context: str) -> HTTPException:
+    logger.exception("Repository error during %s", context, exc_info=exc)
+    if isinstance(exc, (DatabaseUnavailable, psycopg.OperationalError)):
+        return HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        )
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Internal server error",
+    )
 
 
 @app.post(
@@ -115,7 +136,10 @@ async def create_reservation(
     payload: ReservationCreate, repo: ReservationRepository = Depends(get_repository)
 ) -> Reservation:
     """Create a reservation using the database-backed repository."""
-    created = repo.create(payload)
+    try:
+        created = repo.create(payload)
+    except Exception as exc:  # pragma: no cover - mapped via map_repository_error
+        raise map_repository_error(exc, "create_reservation")
     # psycopg returns datetime objects; pydantic model will handle them on response.
     return Reservation(**created)
 
@@ -125,7 +149,10 @@ async def list_reservations(
     repo: ReservationRepository = Depends(get_repository),
 ) -> list[Reservation]:
     """List reservations from the database, ordered by id ASC."""
-    rows = repo.list()
+    try:
+        rows = repo.list()
+    except Exception as exc:  # pragma: no cover - mapped via map_repository_error
+        raise map_repository_error(exc, "list_reservations")
     return [Reservation(**row) for row in rows]
 
 
@@ -138,7 +165,10 @@ async def delete_reservation(
     reservation_id: int, repo: ReservationRepository = Depends(get_repository)
 ) -> None:
     """Delete a reservation; returns 204 on success, 404 if not found."""
-    deleted = repo.delete(reservation_id)
+    try:
+        deleted = repo.delete(reservation_id)
+    except Exception as exc:  # pragma: no cover - mapped via map_repository_error
+        raise map_repository_error(exc, "delete_reservation")
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
 
