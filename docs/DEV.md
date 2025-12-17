@@ -78,7 +78,7 @@ Terraform (phase AWS)
 - Build : `make web-build` ou `cd apps/web && npm run build`.
 
 ### Appels API front (reservations)
-- Base URL : `VITE_API_URL` (ex: `http://localhost:8000`).
+- Base URL : `VITE_API_URL` (ex: `http://localhost:8000` ? port backend, pas 5173).
 - Endpoints utilises : `GET /reservations`, `POST /reservations`.
 - Payload POST attendu (datetime tel que saisi dans le champ `datetime-local`, pas de conversion automatique) :
   ```json

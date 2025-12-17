@@ -1,4 +1,4 @@
-import { API_URL } from "../config";
+import { getApiUrlOrThrow } from "../config";
 
 type Reservation = {
   id: number;
@@ -14,10 +14,7 @@ type NewReservation = {
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const baseUrl = API_URL;
-  if (!baseUrl) {
-    throw new Error("API non configurée (VITE_API_URL manquant)");
-  }
+  const baseUrl = getApiUrlOrThrow();
 
   const response = await fetch(`${baseUrl}${path}`, {
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },

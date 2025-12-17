@@ -1,5 +1,5 @@
 import { Link, Route, Routes } from "react-router-dom";
-import { API_URL } from "./config";
+import { getApiUrlDisplay } from "./config";
 import ClientPage from "./pages/ClientPage";
 import HomePage from "./pages/HomePage";
 import RestaurateurPage from "./pages/RestaurateurPage";
@@ -12,7 +12,7 @@ function App() {
         <div>
           <p className="app__brand">Booking Restaurant</p>
           <p className="app__subtitle">
-            API: <span className="app__api-url">{API_URL ?? "non configurée"}</span>
+            API: <span className="app__api-url">{getApiUrlDisplay()}</span>
           </p>
         </div>
         <nav className="app__nav">
