@@ -5,6 +5,27 @@
 
 $ErrorActionPreference = "Stop"
 
+function Ensure-PythonDeps {
+  try {
+    @'
+import importlib
+import sys
+missing = []
+for mod in ("psycopg", "alembic"):
+    try:
+        importlib.import_module(mod)
+    except ImportError:
+        missing.append(mod)
+if missing:
+    sys.exit(f"missing:{','.join(missing)}")
+print("ok")
+'@ | python - | Out-Null
+  } catch {
+    Write-Host "[dev] Installation des deps API (psycopg, alembic)..." -ForegroundColor Yellow
+    python -m pip install -r apps/api/requirements.txt | Out-Null
+  }
+}
+
 Write-Host "[dev] Démarrage de l'environnement..." -ForegroundColor Cyan
 
 # 1) Démarrer Postgres via docker compose
@@ -19,8 +40,15 @@ if (-not $env:DATABASE_URL) {
 
 # 3) Appliquer les migrations
 Write-Host "[dev] Application des migrations Alembic..."
+Ensure-PythonDeps
 Push-Location apps/api
-alembic -c alembic.ini upgrade head
+try {
+  alembic -c alembic.ini upgrade head
+} catch {
+  Pop-Location
+  Write-Error "[dev] Échec des migrations Alembic. Arrêt."
+  exit 1
+}
 Pop-Location
 
 # 4) Lancer l'API en mode reload
