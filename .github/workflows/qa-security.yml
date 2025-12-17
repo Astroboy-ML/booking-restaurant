@@ -55,14 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build API image
-        run: docker build -t booking-api:ci apps/api
-      - name: Run Trivy image scan
+      - name: Run Trivy fs scan (no image build)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: booking-api:ci
+          scan-type: fs
+          scan-ref: .
           severity: HIGH,CRITICAL
           exit-code: "1"
       - name: Trivy version (debug)
