@@ -23,6 +23,7 @@ API
 Web  
 - Lint : `make web-lint`  
 - Tests : `make web-test`
+> Front : `make` se place dans `apps/web` avant d’exécuter les scripts npm.
 
 Docker  
 - Build images : `make docker-build`  
@@ -65,6 +66,18 @@ Terraform (phase AWS)
 - (Optionnel) Trivy image locale :  
   `docker build -t booking-api:ci apps/api`  
   `trivy image --severity HIGH,CRITICAL --exit-code 1 booking-api:ci`
+
+## Frontend (web)
+- Node 18+ requis (cf. `.nvmrc` et `package.json` → `engines.node >= 18`).  
+- Dépendances : `cd apps/web && npm install`.  
+- Variables d’environnement : copier `.env.example` en `.env`, renseigner `VITE_API_URL` (non hardcodée dans le code, lue via `src/config.ts`).  
+- Lancement dev : `cd apps/web && npm run dev`.  
+- Lint : `make web-lint` ou `cd apps/web && npm run lint`.  
+- Tests one-shot : `make web-test` ou `cd apps/web && npm run test` (Vitest run, jsdom, setup RTL).  
+- Tests watch : `cd apps/web && npm run test:watch`.  
+- Build : `make web-build` ou `cd apps/web && npm run build`.
+
+> Déploiement statique : l’app utilise `BrowserRouter`. Prévoir un fallback vers `index.html` sur toutes les routes (`/client`, `/restaurateur`) pour éviter les 404 en refresh côté serveur/CDN.
 
 ## Déploiement local sur kind (API + Postgres)
 Prérequis : Docker, kind, kubectl.
