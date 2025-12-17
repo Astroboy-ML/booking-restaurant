@@ -7,6 +7,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
@@ -30,6 +31,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Booking Restaurant API", lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
+# Allow frontend dev server (localhost:5173) to call the API in dev
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger = logging.getLogger("booking_api")
 logger.setLevel(logging.INFO)
