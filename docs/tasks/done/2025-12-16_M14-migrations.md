@@ -16,10 +16,10 @@ Mettre en place des migrations versionnees pour Postgres (tables restaurants et 
 - Alembic configure, migration initiale cree les tables avec FK et seed restaurant par defaut.
 - Commande `make api-migrate` applique l'upgrade.
 - UI Adminer ajoutee pour verifier la base.
+- Cibles Makefile api-test/api-lint disponibles pour aligner avec la CI.
 
 ## Ecarts / risques
 - Encodage corrige; front matter normalise.
-- Makefile manque toujours les cibles api-test/api-lint.
 
 ## Criteres d'acceptation
 - [x] Migration appliquee en local via commande documentee

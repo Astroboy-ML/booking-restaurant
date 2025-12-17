@@ -17,9 +17,10 @@ Mettre en place les bases du repo API : endpoint de sante, tests, et environneme
 - Docker Compose lance Postgres + API en local.
 - Documentation mentionne comment lancer via compose.
 - Workflow CI present pour lint/tests.
+- Cibles Makefile api-lint et api-test ajoutées pour aligner avec la CI.
 
 ## Ecarts / risques
-- Makefile ne fournit pas encore les cibles api-test/api-lint alignees sur la CI.
+- Aucun ecart majeur en cours sur ce ticket.
 
 ## Criteres d'acceptation
 - [x] API : endpoint GET /health retourne 200

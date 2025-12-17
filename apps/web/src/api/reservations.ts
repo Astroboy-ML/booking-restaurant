@@ -49,5 +49,11 @@ async function createReservation(input: NewReservation): Promise<Reservation> {
   return reservation;
 }
 
+async function deleteReservation(id: number): Promise<void> {
+  await request<void>(`/reservations/${id}`, {
+    method: "DELETE"
+  });
+}
+
 export type { Reservation, NewReservation };
-export { getReservations, createReservation };
+export { getReservations, createReservation, deleteReservation };

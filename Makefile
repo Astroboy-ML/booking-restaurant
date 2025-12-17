@@ -1,4 +1,4 @@
-.PHONY: web-lint web-test web-build api-migrate api-migrate-revision docker-up docker-down
+.PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision docker-up docker-down
 
 web-lint:
 	cd apps/web && npm run lint
@@ -8,6 +8,12 @@ web-test:
 
 web-build:
 	cd apps/web && npm run build
+
+api-lint:
+	cd apps/api && ruff check . && ruff format --check .
+
+api-test:
+	cd apps/api && python -m pytest
 
 api-migrate:
 	cd apps/api && alembic -c alembic.ini upgrade head
