@@ -1,40 +1,26 @@
-# Ticket: M4 — Cancel reservation (DELETE /reservations/{id})
+﻿---
+id: "2025-12-16_M4-cancel-reservation"
+title: "M4 Annuler une reservation"
+type: feature
+area: backend
+agents_required: [backend]
+depends_on: ["2025-12-16_M3-list-reservations"]
+validated_by:
+validated_at:
+---
 
-## But
-Ajouter la suppression (annulation) d’une réservation persistée en PostgreSQL.
+## Contexte
+Permettre la suppression/annulation d'une reservation.
 
-## Scope
-- apps/api/
-- docs/DEV.md (si besoin)
+## Realise
+- Endpoint DELETE /reservations/{id} renvoie 204 en succes, 404 sinon.
+- Tests d'integration pour succes et 404.
 
-## Contraintes
-- Réutiliser la couche repository SQL brut existante
-- Pas de refactor hors scope
-- Tests obligatoires (unit + integration si possible)
-- Réponse claire en cas d’id inexistant
+## Ecarts / risques
+- Pas de payload d'erreur structure pour les reponses 4xx.
 
-## Spécification API
-### DELETE /reservations/{id}
-- Si la réservation existe : supprimer en DB et retourner 204 No Content (ou 200 avec payload, mais choisir 204 de préférence)
-- Si l’id n’existe pas : retourner 404 Not Found
-
-## Tests
-- Test d’intégration DB :
-  1) créer une réservation via POST
-  2) la supprimer via DELETE
-  3) appeler GET /reservations et vérifier qu’elle n’est plus présente
-- Test “not found” :
-  - DELETE sur un id inexistant → 404
-- Les tests DB doivent être marqués `integration` et skippables si DB down
-
-## Critères d’acceptation
-- [ ] DELETE /reservations/{id} supprime réellement en PostgreSQL
-- [ ] 204 quand supprimé, 404 si inexistant
-- [ ] Tests OK (`pytest`)
-- [ ] Tests integration OK (`pytest -m integration`)
-- [ ] Docs à jour si nécessaire
-
-## Plan proposé (à remplir par l’agent)
-1)
-2)
-3)
+## Criteres d'acceptation
+- [x] Endpoint DELETE retourne 204 en cas de suppression
+- [x] Endpoint retourne 404 si l'ID n'existe pas
+- [x] Tests d'integration couvrent les deux cas
+- [ ] Erreurs structurees/documentees

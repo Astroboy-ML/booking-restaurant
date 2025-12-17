@@ -1,28 +1,40 @@
-# Ticket: M22 â€” Documentation architecture & ADR
+---
+id: "2025-12-16_M22-doc-architecture"
+title: "M22 Documentation d’architecture"
+type: doc
+area: product
+agents_required: [product, backend, devops]
+depends_on: []
+validated_by:
+validated_at:
+---
+
+# Ticket: M22 Documentation d’architecture
 
 ## But
-Formaliser lâ€™architecture cible (local, kind, AWS) et consigner les dÃ©cisions clÃ©s via des ADR.
+Produire une documentation d’architecture claire (schémas, flux, composants) pour l’API, la base, le déploiement et les dépendances.
 
 ## Scope
-- docs/ (nouveau dossier architecture/adr si besoin)
-- README.md et docs/DEV.md (liens)
+- Schémas (composants, séquences)
+- Cartographie des environnements (local/CI/prod)
+- Doc des flux (API, DB, observabilité)
 
 ## Contraintes
-- Rester alignÃ© avec le Project Charter (API FastAPI, Web React, Postgres, Docker/K8s, Terraform AWS, CI/CD GitHub Actions).
-- Au moins deux ADR (ex: choix FastAPI, choix EKS+ECR via Terraform) numÃ©rotÃ©es et datÃ©es.
-- Diagramme ou description textuelle des flux (Web â†’ API â†’ DB) et des environnements.
+- Documentation à jour par rapport aux migrations et déploiements actuels
+- Partageable (format Markdown/diagrams as code si possible)
+- Aucun secret dans les docs
 
 ## Deliverables
-- Document dâ€™architecture synthÃ©tique couvrant dev local (Compose), kind, et cible AWS (ECR/EKS).
-- ADR structurÃ©es (contexte, dÃ©cision, consÃ©quences) pour les choix principaux.
-- Liens ajoutÃ©s depuis README et docs/DEV.md vers la documentation architecture/ADR.
+- Pages docs (Markdown) avec schémas
+- Références aux pipelines, déploiements, migrations
+- Plan de mise à jour continue
 
-## CritÃ¨res dâ€™acceptation
-- [ ] Les ADR sont prÃ©sentes, datÃ©es, numÃ©rotÃ©es et rÃ©fÃ©rencÃ©es.
-- [ ] Lâ€™architecture dÃ©crit clairement les composants et flux pour local/kind/AWS.
-- [ ] README/docs renvoient vers la nouvelle documentation.
+## Critères d’acceptation
+- [ ] Les schémas couvrent API/DB/déploiement/observabilité
+- [ ] Les environnements (local/CI/prod) sont décrits
+- [ ] Les docs ne contiennent pas de secrets
 
-## Plan proposÃ©
-1) RÃ©diger un document dâ€™architecture (diagramme texte ou image) couvrant local, kind et AWS.
-2) Ã‰crire au moins deux ADR sur les choix majeurs (stack API, infra EKS/ECR Terraform).
-3) Ajouter les liens vers ces documents dans README et docs/DEV.md.
+## Plan proposé
+1) Recenser les composants et flux actuels
+2) Rédiger/mettre à jour les schémas et pages
+3) Ajouter les références aux pipelines et migrations

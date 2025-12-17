@@ -1,7 +1,18 @@
-# Ticket: M15 â€” Terraform bootstrap (AWS provider + backend + lint)
+---
+id: "2025-12-16_M15-terraform-bootstrap"
+title: "M15 Terraform bootstrap (AWS provider + backend + lint)"
+type: feature
+area: devops
+agents_required: [devops]
+depends_on: []
+validated_by:
+validated_at:
+---
+
+# Ticket: M15 Terraform bootstrap (AWS provider + backend + lint)
 
 ## But
-Initialiser la stack Terraform AWS pour prÃ©parer la phase cloud (ECR/EKS) sans crÃ©er encore de ressources coÃ»teuses.
+Initialiser la stack Terraform AWS pour préparer la phase cloud (ECR/EKS) sans créer encore de ressources coûteuses.
 
 ## Scope
 - infra/terraform/
@@ -9,21 +20,21 @@ Initialiser la stack Terraform AWS pour prÃ©parer la phase cloud (ECR/EKS) sans 
 - docs/DEV.md ou README Terraform
 
 ## Contraintes
-- Aucun secret ou identifiant AWS en dur ; backend S3/remote paramÃ©trable.
-- CompatibilitÃ© `make tf-fmt`, `make tf-validate`, `make tf-plan` (plan sans apply par dÃ©faut).
-- Version Terraform verrouillÃ©e et providers explicitÃ©s.
+- Aucun secret ou identifiant AWS en dur ; backend S3/remote paramétrable.
+- Compatibilité `make tf-fmt`, `make tf-validate`, `make tf-plan` (plan sans apply par défaut).
+- Version Terraform verrouillée et providers explicités.
 
 ## Deliverables
 - Fichiers de base : providers/versions/backend/variables/outputs stubs.
-- Cibles Makefile pour fmt/validate/plan avec instructions dâ€™usage.
-- Documentation Terraform (prÃ©-requis AWS profile/OIDC, commandes).
+- Cibles Makefile pour fmt/validate/plan avec instructions d’usage.
+- Documentation Terraform (pré-requis AWS profile/OIDC, commandes).
 
-## CritÃ¨res dâ€™acceptation
-- [ ] `make tf-fmt` et `make tf-validate` passent sans ressources crÃ©Ã©es.
-- [ ] Le backend et les variables sont documentÃ©s et non hardcodÃ©s.
-- [ ] Pas de secret ou dâ€™ARN collÃ© en clair dans Git.
+## Critères d’acceptation
+- [ ] `make tf-fmt` et `make tf-validate` passent sans ressources créées.
+- [ ] Le backend et les variables sont documentés et non hardcodés.
+- [ ] Pas de secret ou d’ARN collé en clair dans Git.
 
-## Plan proposÃ©
-1) CrÃ©er les fichiers Terraform initiaux et verrouiller versions/providers.
+## Plan proposé
+1) Créer les fichiers Terraform initiaux et verrouiller versions/providers.
 2) Ajouter les cibles Makefile et tester fmt/validate/plan localement.
-3) Documenter la configuration AWS/OIDC et lâ€™exÃ©cution des commandes.
+3) Documenter la configuration AWS/OIDC et l’exécution des commandes.

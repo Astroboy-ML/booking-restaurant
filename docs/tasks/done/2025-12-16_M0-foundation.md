@@ -1,32 +1,29 @@
-# Ticket: M0 — Foundation (scaffold + workflow + hello API)
+﻿---
+id: "2025-12-16_M0-foundation"
+title: "M0 Foundation (health, compose, CI)"
+type: feature
+area: backend
+agents_required: [backend]
+depends_on: []
+validated_by:
+validated_at:
+---
 
-## But
-Mettre en place les bases du repo pour travailler proprement (local + CI) avant de développer le produit.
+## Contexte
+Mettre en place les bases du repo API : endpoint de sante, tests, et environnement local reproductible.
 
-## Contexte / fichiers
-- apps/api/
-- docker-compose.yml
-- docs/DEV.md
-- .github/ (CI à ajouter)
-- (optionnel) Makefile / scripts
+## Realise
+- Endpoint GET /health retourne 200 avec test automatique.
+- Docker Compose lance Postgres + API en local.
+- Documentation mentionne comment lancer via compose.
+- Workflow CI present pour lint/tests.
 
-## Contraintes
-- Pas de refactor inutile
-- Pas de nouvelles dépendances non justifiées
-- Pas de secrets dans Git
-- Rester minimal et reproductible
+## Ecarts / risques
+- Makefile ne fournit pas encore les cibles api-test/api-lint alignees sur la CI.
 
-## Critères d’acceptation
-- [ ] API : endpoint `GET /health` retourne 200
-- [ ] API : au moins 1 test automatisé pour `/health`
-- [ ] Docker Compose : lance au minimum Postgres + API en local
-- [ ] Documentation : `docs/DEV.md` indique comment lancer (compose) et tester
-- [ ] CI : un workflow qui exécute au moins lint + tests API
-
-## Plan proposé (à remplir par l’agent)
-1)
-2)
-3)
-
-## Notes / risques
-- ...
+## Criteres d'acceptation
+- [x] API : endpoint GET /health retourne 200
+- [x] API : au moins un test automatise pour /health
+- [x] Docker Compose : lance Postgres + API en local
+- [x] Documentation : indique comment lancer et tester
+- [x] CI : un workflow executant lint + tests API

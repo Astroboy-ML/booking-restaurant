@@ -1,29 +1,40 @@
-# Ticket: M21 â€” Gestion des secrets & scans sÃ©curitÃ© (CI + k8s)
+---
+id: "2025-12-16_M21-securite-secrets"
+title: "M21 Sécurité & gestion des secrets"
+type: feature
+area: security
+agents_required: [security, devops]
+depends_on: []
+validated_by:
+validated_at:
+---
+
+# Ticket: M21 Sécurité & gestion des secrets
 
 ## But
-SÃ©curiser la gestion des secrets et ajouter des scans automatiques pour Ã©viter les fuites et failles IaC/app.
+Mettre en place une gestion des secrets conforme (pas de secrets en clair) et des scans de secrets dans la CI.
 
 ## Scope
-- k8s/ (secrets chiffrÃ©s : SOPS/SealedSecrets)
-- .github/workflows/ (gitleaks + tfsec/checkov + Ã©ventuellement scan conteneur)
-- docs/DEV.md (procÃ©dure de gÃ©nÃ©ration/rotation)
+- Vault/SSM/Secrets Manager ou équivalent pour stocker les secrets
+- Intégration CI (scan de secrets type gitleaks)
+- Documentation des bonnes pratiques
 
 ## Contraintes
-- Aucun secret en clair dans Git ; chiffrement ou scellage obligatoire pour les manifests.
-- CI doit Ã©chouer en cas de secret en clair ou de faille IaC critique.
-- Compatible avec les workflows OIDC (pas de clÃ©s statiques).
+- Aucune donnée sensible en clair dans GitHub
+- CI doit échouer en cas de secret détecté
+- Accès aux secrets via permissions minimales (principle of least privilege)
 
 ## Deliverables
-- StratÃ©gie de secrets versionnÃ©s chiffrÃ©s (SOPS+age ou SealedSecrets) avec exemple pour lâ€™API key/DB.
-- Workflows CI exÃ©cutant gitleaks et tfsec/checkov (et option scan image) avec badge/rapport.
-- Documentation expliquant gÃ©nÃ©ration de clÃ©s, ajout/rotation des secrets et usage en local/k8s/CI.
+- Solution de stockage de secrets définie et documentée
+- Scan de secrets intégré à la CI
+- Guide d’usage pour dev/ops
 
-## CritÃ¨res dâ€™acceptation
-- [ ] Les manifests de secrets dans Git sont chiffrÃ©s (ou scellÃ©s) uniquement.
-- [ ] gitleaks et tfsec/checkov tournent en CI et Ã©chouent sur dÃ©tections.
-- [ ] La doc dÃ©crit clairement comment crÃ©er/mettre Ã  jour les secrets sans les exposer.
+## Critères d’acceptation
+- [ ] Aucun secret en clair dans le repo (scan de secrets passe)
+- [ ] Les secrets sont stockés dans un service dédié documenté
+- [ ] La CI échoue si un secret est détecté
 
-## Plan proposÃ©
-1) Choisir lâ€™outil de chiffrement des secrets et ajouter un exemple pour lâ€™API/DB.
-2) Ajouter les jobs CI gitleaks + tfsec/checkov (et option scan image) avec docs des variables.
-3) Documenter le workflow complet de gestion des secrets (local, CI, rotation).
+## Plan proposé
+1) Choisir/mettre en place l’outil de secrets (Vault/SSM/Secrets Manager)
+2) Ajouter un scan de secrets à la CI (gitleaks ou équivalent)
+3) Documenter l’usage des secrets et les permissions nécessaires

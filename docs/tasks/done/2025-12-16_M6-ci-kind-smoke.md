@@ -1,46 +1,23 @@
-# Ticket: M6 — CI/CD with kind (build + deploy + smoke tests)
+﻿---
+id: "2025-12-16_M6-ci-kind-smoke"
+title: "M6 CI kind smoke"
+type: feature
+area: devops
+agents_required: [devops]
+depends_on: []
+validated_by:
+validated_at:
+---
 
-## But
-Mettre en place une CI GitHub Actions qui :
-- exécute les tests API
-- build l’image Docker API
-- crée un cluster kind
-- déploie les manifests k8s (kustomize)
-- vérifie /health (et idéalement POST/GET reservations)
+## Contexte
+Assurer un smoke test k8s via kind dans la CI.
 
-## Scope
-- .github/workflows/
-- (optionnel) docs/DEV.md si on ajoute des commandes CI utiles
+## Realise
+- Workflow kind-smoke (build image, cluster, smoke tests).
 
-## Contraintes
-- Pas de secrets (pas d’AWS encore)
-- Reproductible et rapide (objectif < 10 min)
-- On réutilise `k8s/` (kustomize) et l’image `booking-api:local`
-- On garde des logs lisibles en cas d’échec
+## Ecarts / risques
+- Ticket initial sans template. Pas de badge/README mentionnant le workflow.
 
-## CI attendue
-### Job 1: api-tests
-- setup python
-- install requirements
-- pytest (unit + integration “skippable” ok)
-
-### Job 2: k8s-smoke (après api-tests)
-- setup docker
-- build `booking-api:local`
-- create kind cluster
-- kind load docker-image
-- kubectl apply -k k8s
-- wait pods ready
-- port-forward ou curl via service (selon stratégie)
-- GET /health doit retourner 200
-
-## Critères d’acceptation
-- [ ] Workflow s’exécute sur PR + push sur master/main
-- [ ] api-tests passe
-- [ ] k8s-smoke passe et prouve /health OK
-- [ ] En cas d’échec, logs utiles (kubectl get pods, describe, logs)
-
-## Plan proposé (à remplir par l’agent)
-1)
-2)
-3)
+## Criteres d'acceptation
+- [x] Workflow kind-smoke actif dans la CI
+- [ ] Badge/mention dans README

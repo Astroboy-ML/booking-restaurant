@@ -1,29 +1,40 @@
-# Ticket: M16 â€” AuthN minimale par clÃ© dâ€™API (post-MVP)
+---
+id: "2025-12-16_M16-auth-apikey"
+title: "M16 Auth API key"
+type: feature
+area: backend
+agents_required: [backend, security]
+depends_on: ["2025-12-16_M0-foundation"]
+validated_by:
+validated_at:
+---
+
+# Ticket: M16 Auth API key
 
 ## But
-SÃ©curiser lâ€™API de rÃ©servation pour les environnements dÃ©mo en ajoutant une vÃ©rification par clÃ© dâ€™API simple.
+Ajouter une authentification par clé API pour protéger les endpoints sensibles (exposition REST publique contrôlée).
 
 ## Scope
-- apps/api/ (dÃ©pendances lÃ©gÃ¨res FastAPI)
-- tests API
-- docs/DEV.md (configuration de la clÃ©)
+- API FastAPI : middleware ou dépendance de sécurité
+- Configuration : clé(s) côté env/secret
+- Docs : mentionner comment l’utiliser
 
 ## Contraintes
-- ClÃ© fournie uniquement via variables dâ€™environnement ou secrets k8s (jamais en clair dans Git).
-- Appliquer la vÃ©rification sur les endpoints rÃ©servations ; rÃ©ponse 401/403 si clÃ© manquante/incorrecte.
-- Ne pas changer le contrat JSON des endpoints hors auth.
+- Pas de clé en clair dans Git ; utiliser variables d’environnement ou secret store
+- Refuser les requêtes sans clé ou avec clé invalide
+- Ne pas casser les endpoints publics (health/metrics si souhaité)
 
 ## Deliverables
-- DÃ©pendance/config FastAPI pour vÃ©rifier la clÃ© via un header (ex: `X-API-Key`).
-- Tests couvrant les cas : clÃ© absente, clÃ© invalide, clÃ© correcte.
-- Documentation pour gÃ©nÃ©rer/fournir la clÃ© en local, compose, k8s, CI.
+- Implémentation API key (header ou query param) avec tests
+- Paramétrage via env/secret
+- Documentation d’usage
 
-## CritÃ¨res dâ€™acceptation
-- [ ] Tous les endpoints rÃ©servations refusent sans clÃ© valide.
-- [ ] Variables dâ€™environnement/secret nÃ©cessaires sont documentÃ©es.
-- [ ] Tests passent (pytest) en couvrant la sÃ©curitÃ©.
+## Critères d’acceptation
+- [ ] Les endpoints protégés renvoient 401/403 sans clé valide
+- [ ] La clé n’est pas stockée en clair dans le repo
+- [ ] Les tests couvrent succès/échec d’auth
 
-## Plan proposÃ©
-1) Ajouter un dÃ©pendant de sÃ©curitÃ© qui valide la clÃ© dâ€™API sur les routes.
-2) Ã‰tendre la config/Ã©chantillons env et les tests pour les scÃ©narios auth.
-3) Documenter lâ€™utilisation de la clÃ© en local/k8s/CI.
+## Plan proposé
+1) Ajouter une dépendance de sécurité/API key et les settings associés
+2) Protéger les endpoints concernés et écrire les tests
+3) Documenter l’utilisation et la configuration des clés

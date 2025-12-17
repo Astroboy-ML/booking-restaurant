@@ -1,28 +1,40 @@
-# Ticket: M20 â€” ObservabilitÃ© EKS (Prometheus + Grafana optionnel)
+---
+id: "2025-12-16_M20-observabilite-eks"
+title: "M20 Observabilité sur EKS"
+type: feature
+area: devops
+agents_required: [devops]
+depends_on: ["2025-12-16_M19-deploy-eks"]
+validated_by:
+validated_at:
+---
+
+# Ticket: M20 Observabilité EKS
 
 ## But
-Collecter les mÃ©triques de lâ€™API dÃ©ployÃ©e sur EKS et offrir une visibilitÃ© basique via Prometheus (et Grafana optionnel).
+Mettre en place la collecte des logs/metrics/traces sur EKS pour suivre l’API en production.
 
 ## Scope
-- k8s/ (charts/manifests observabilitÃ©)
-- docs/DEV.md (procÃ©dure dâ€™installation)
+- Stack observabilité (Prometheus/Grafana/CloudWatch/OTel selon choix)
+- Dashboards et alertes de base
+- Documentation
 
 ## Contraintes
-- Utiliser Helm ou kustomize ; pas dâ€™exposition publique non sÃ©curisÃ©e.
-- Ciblage des endpoints `/metrics` de lâ€™API uniquement ; compatible kind et EKS.
-- Installation dÃ©sactivable/isolÃ©e par environnement.
+- Coût maîtrisé (composants managés ou sizing minimal)
+- Pas de secrets en clair
+- Export des métriques existantes (Prometheus FastAPI) exploitable
 
 ## Deliverables
-- Manifests/Chart pour Prometheus (scrape ServiceMonitor/PodMonitor de lâ€™API).
-- (Optionnel) Grafana avec un dashboard HTTP basique (latence, taux de succÃ¨s).
-- Documentation pour installer/accÃ©der (port-forward, commandes helm/kubectl).
+- Manifests/helm pour la stack d’observabilité
+- Dashboards/alertes de base
+- Documentation d’accès
 
-## CritÃ¨res dâ€™acceptation
-- [ ] Prometheus scrape `/metrics` et voit des Ã©chantillons HTTP.
-- [ ] La doc dÃ©crit comment accÃ©der aux mÃ©triques/dashboards (port-forward).
-- [ ] Lâ€™installation peut Ãªtre activÃ©e/dÃ©sactivÃ©e selon lâ€™environnement.
+## Critères d’acceptation
+- [ ] Les métriques de l’API sont collectées et visibles (dashboard)
+- [ ] Les logs applicatifs sont centralisés
+- [ ] Une alerte basique est configurée (ex: taux d’erreur)
 
-## Plan proposÃ©
-1) Ajouter les manifests Prometheus (+ ServiceMonitor/PodMonitor) ciblant lâ€™API.
-2) (Option) Ajouter Grafana avec dashboard importÃ© et credentials non commitÃ©s.
-3) Documenter lâ€™installation sur kind/EKS et lâ€™accÃ¨s aux mÃ©triques.
+## Plan proposé
+1) Choisir la stack (Prom/Grafana/OTel ou CloudWatch) et la déployer
+2) Brancher l’API (scrape metrics, logs)
+3) Créer un dashboard et une alerte minimale

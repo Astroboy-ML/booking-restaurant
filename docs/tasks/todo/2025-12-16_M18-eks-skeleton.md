@@ -1,28 +1,40 @@
-# Ticket: M18 â€” Squelette EKS (VPC + cluster + node group minimal)
+---
+id: "2025-12-16_M18-eks-skeleton"
+title: "M18 EKS skeleton"
+type: feature
+area: devops
+agents_required: [devops]
+depends_on: ["2025-12-16_M15-terraform-bootstrap", "2025-12-16_M17-ecr-build"]
+validated_by:
+validated_at:
+---
+
+# Ticket: M18 EKS skeleton
 
 ## But
-DÃ©finir lâ€™infrastructure minimale EKS pour prÃ©parer un dÃ©ploiement cloud aprÃ¨s stabilisation du MVP.
+Mettre en place l’ossature EKS (cluster, nodegroups) sans déployer encore l’application complète.
 
 ## Scope
-- infra/terraform/ (modules VPC/EKS)
-- docs/DEV.md ou README infra
+- Terraform EKS (infra/terraform)
+- Paramétrage réseau de base (VPC/subnets) si non existant
+- Documentation
 
 ## Contraintes
-- Utiliser des modules maintenus (VPC + EKS) ; dimensionnement minimal pour une dÃ©mo.
-- Pas de workloads applicatifs dÃ©ployÃ©s dans ce ticket.
-- Variables pour tailles/nÅ“uds configurables ; pas de credentials hardcodÃ©s.
+- Pas de ressources coûteuses non maîtrisées (tailles modestes, éventuellement désactivées en plan-only)
+- Variables pour VPC/subnets et sizing
+- Pas de secrets en clair
 
 ## Deliverables
-- Terraform pour VPC, subnets, cluster EKS et un node group lÃ©ger (scalable).
-- Outputs nÃ©cessaires pour kubeconfig (cluster name/ARN, rÃ©gion, endpoint).
-- Documentation plan/apply (avec avertissement coÃ»ts) et rÃ©cupÃ©ration de kubeconfig.
+- Modules/ressources Terraform pour créer un cluster EKS minimal
+- Variables documentées
+- Cibles Makefile ou commandes pour plan/apply (plan-only par défaut)
 
-## CritÃ¨res dâ€™acceptation
-- [ ] `terraform plan` crÃ©e seulement VPC + EKS + node group minimal.
-- [ ] kubeconfig rÃ©cupÃ©rable via outputs/commande documentÃ©e.
-- [ ] Aucun secret ou identifiant en clair dans le code.
+## Critères d’acceptation
+- [ ] Le plan Terraform affiche la création d’un cluster EKS et nodegroups configurables
+- [ ] Les variables réseau/sizing sont paramétrables et documentées
+- [ ] Pas de secret ou ARN en clair dans Git
 
-## Plan proposÃ©
-1) Importer/configurer les modules VPC et EKS avec variables pour tailles/subnets.
-2) Ajouter outputs utiles (kubeconfig, cluster ARN, node group) et tags.
-3) Documenter les Ã©tapes plan/apply et les prÃ©cautions coÃ»ts.
+## Plan proposé
+1) Définir VPC/subnets/roles nécessaires (variables)
+2) Décrire le cluster EKS (nodegroups) en Terraform
+3) Documenter les commandes de plan/apply et les paramètres

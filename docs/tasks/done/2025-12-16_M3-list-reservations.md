@@ -1,42 +1,25 @@
-# Ticket: M3 — List reservations (GET /reservations) from PostgreSQL
+﻿---
+id: "2025-12-16_M3-list-reservations"
+title: "M3 Lister les reservations"
+type: feature
+area: backend
+agents_required: [backend]
+depends_on: ["2025-12-16_M2-postgres-persistence"]
+validated_by:
+validated_at:
+---
 
-## But
-Ajouter un endpoint de lecture qui liste les réservations persistées en PostgreSQL.
+## Contexte
+Exposer la liste des reservations existantes.
 
-## Scope
-- apps/api/
-- docs/DEV.md (si commandes/notes changent)
+## Realise
+- Endpoint GET /reservations retournant la liste ordonnee.
+- Test d'integration verifiant la presence des IDs crees.
 
-## Contraintes
-- Réutiliser la couche DB existante (SQL brut + psycopg + repository)
-- Pas de refactor hors scope
-- Pas de pagination/tri avancés en M3 (on garde simple)
-- Tests obligatoires
+## Ecarts / risques
+- Pas de pagination ni documentation specifique.
 
-## Spécification API
-### GET /reservations
-- Retourne 200
-- Body : liste de réservations, chaque élément contient au minimum :
-  - id, name, date_time, party_size
-
-## Tests
-- Ajouter au moins 1 test d’intégration DB :
-  - créer 2 réservations (via repo ou via POST)
-  - appeler GET /reservations
-  - vérifier qu’au moins ces 2 réservations sont présentes
-
-Optionnel : un test simple qui vérifie que GET renvoie une liste même vide (DB up mais table vide).
-
-## Critères d’acceptation
-- [ ] GET /reservations fonctionne et lit depuis PostgreSQL
-- [ ] Tests unitaires OK
-- [ ] Tests d’intégration DB OK (`pytest -m integration`)
-- [ ] Docs à jour si nécessaire
-
-## Plan proposé (à remplir par l’agent)
-1)
-2)
-3)
-
-## Notes
-- Garder un SQL simple (SELECT … ORDER BY id ASC par exemple).
+## Criteres d'acceptation
+- [x] Endpoint GET /reservations retourne les reservations ordonnees
+- [x] Tests d'integration couvrent la liste
+- [ ] Pagination/documentation ajoutees

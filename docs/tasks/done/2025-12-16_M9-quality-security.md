@@ -1,38 +1,26 @@
-﻿# Ticket: M9  Quality & Security baseline (pre-commit + SAST + dependency + container scan)
+﻿---
+id: "2025-12-16_M9-quality-security"
+title: "M9 Qualite et securite"
+type: feature
+area: security
+agents_required: [security, backend]
+depends_on: []
+validated_by:
+validated_at:
+---
 
-## But
-Mettre en place un socle qualité/sécurité pro (local + CI) sans refactor massif.
+## Contexte
+Mettre en place les workflows de qualite et securite de base.
 
-## Scope
-- apps/api/**
-- .github/workflows/**
-- .github/dependabot.yml
-- docs/DEV.md
-- (optionnel) .pre-commit-config.yaml
+## Realise
+- Workflows Ruff, Bandit, pip-audit, Trivy en place.
 
-## Deliverables
-### Local developer experience
-- pre-commit configuré
-- Ruff (lint + format) sur lAPI
-- Commandes documentées (install + run)
+## Ecarts / risques
+- Makefile ne fournit pas les cibles standard (api-test/api-lint) alignement CI.
+- Pas de scan de secrets (gitleaks) pour l'instant.
 
-### CI
-- Job lint/format (Ruff)
-- Job security (Bandit + pip-audit)
-- Job container scan (Trivy) sur limage API (booking-api:local ou tag CI)
-- Les checks doivent tourner sur push + pull_request
-
-### Automation deps
-- Dependabot pour Python (apps/api/requirements.txt) + GitHub Actions
-
-## Contraintes
-- Pas de refactor business
-- Pas dajout doutils lourds inutiles
-- Doit rester reproductible sur Windows
-- Les workflows existants (api-ci, kind-smoke) ne doivent pas être cassés
-
-## Critères dacceptation
-- [ ] pre-commit fonctionne en local (au moins ruff + ruff-format)
-- [ ] CI exécute lint + security + scan container
-- [ ] Dependabot actif et valide (YAML correct)
-- [ ] docs/DEV.md explique comment lancer les checks
+## Criteres d'acceptation
+- [x] Lint (Ruff) et tests securite (Bandit, pip-audit) dans la CI
+- [x] Scan Trivy configure
+- [ ] Scan de secrets ajoute
+- [ ] Cibles Makefile alignees sur la CI
