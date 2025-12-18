@@ -19,6 +19,7 @@ from app.db.repository import (
     get_repository,
     run_migrations,
 )
+from app.security import require_api_key
 
 
 @asynccontextmanager
@@ -33,6 +34,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Booking Restaurant API", lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
+PROTECTED_DEPENDENCIES = [Depends(require_api_key)]
 
 # Allow frontend dev server (localhost:5173) to call the API in dev
 app.add_middleware(
@@ -122,6 +125,7 @@ class Reservation(ReservationCreate):
     response_model=Reservation,
     status_code=201,
     tags=["reservations"],
+    dependencies=PROTECTED_DEPENDENCIES,
 )
 async def create_reservation(
     payload: ReservationCreate, repo: ReservationRepository = Depends(get_repository)
@@ -138,7 +142,12 @@ async def create_reservation(
     return Reservation(**created)
 
 
-@app.get("/reservations", response_model=list[Reservation], tags=["reservations"])
+@app.get(
+    "/reservations",
+    response_model=list[Reservation],
+    tags=["reservations"],
+    dependencies=PROTECTED_DEPENDENCIES,
+)
 async def list_reservations(
     repo: ReservationRepository = Depends(get_repository),
 ) -> list[Reservation]:
@@ -157,6 +166,7 @@ async def list_reservations(
     "/reservations/{reservation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["reservations"],
+    dependencies=PROTECTED_DEPENDENCIES,
 )
 async def delete_reservation(
     reservation_id: int, repo: ReservationRepository = Depends(get_repository)

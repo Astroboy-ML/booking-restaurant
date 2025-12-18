@@ -54,6 +54,12 @@ Ajouter une authentification par clé API configurable (header ou query param) q
 3) Documenter l’utilisation de la clé (header/paramètre) et la configuration côté déploiement (env/secret).
 
 ## À contrôler
-- Vérifier que la clé n’apparaît pas dans le code, les logs ou les fixtures de test.
-- Confirmer que les endpoints publics restent accessibles sans authentification.
-- Harmoniser l’en-tête ou le paramètre utilisé (ex: `X-API-Key`) dans la doc et les tests.
+- Résumé : ajout d’une vérification par clé API (header ou query) sur les routes de réservation, avec configuration via variables d’environnement et documentation d’usage.
+- Fichiers modifiés : `apps/api/main.py`, `apps/api/app/security.py`, `apps/api/tests/conftest.py`, `apps/api/tests/test_api_key_auth.py`, `apps/api/README.md`.
+- Commandes exécutées : `cd apps/api && python -m pytest` (6 passed, 6 skipped).
+- AC :
+  - [x] Endpoints protégés renvoient 401/403 sans clé valide et 200 avec la clé correcte (tests `test_api_key_auth.py`).
+  - [x] Clé injectée via configuration/secret : lecture `API_KEY` depuis l’environnement, aucune valeur sensible en dur.
+  - [x] Endpoints publics accessibles sans clé (tests health/metrics). 
+  - [x] Documentation mise à jour avec configuration et usage du header/query param (`apps/api/README.md`).
+- Risques/rollback : faible ; supprimer les dépendances d’auth dans `apps/api/main.py` et retirer le module `app/security.py` pour revenir au comportement précédent.
