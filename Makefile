@@ -3,6 +3,13 @@ DEV_COMPOSE = docker-compose.dev.yml
 
 .PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision dev dev-docker dev-stop dev-reset
 
+TF_DIR := infra/terraform
+TF_BACKEND_BUCKET ?=
+TF_BACKEND_REGION ?=
+TF_BACKEND_DYNAMODB_TABLE ?=
+TF_INIT_BACKEND_OPTS := $(if $(TF_BACKEND_BUCKET),-backend-config="bucket=$(TF_BACKEND_BUCKET)") $(if $(TF_BACKEND_REGION),-backend-config="region=$(TF_BACKEND_REGION)") $(if $(TF_BACKEND_DYNAMODB_TABLE),-backend-config="dynamodb_table=$(TF_BACKEND_DYNAMODB_TABLE)")
+TF_PLAN_ARGS ?=
+
 web-lint:
 	cd apps/web && npm run lint
 
@@ -54,3 +61,14 @@ dev-reset:
 	@echo "DB       : localhost:5432 (user=booking password=booking db=booking)"
 	@echo "Front    : lancer 'cd apps/web && npm install && npm run dev'"
 	@echo "Front URL: http://localhost:5173"
+
+tf-fmt:
+	terraform -chdir=$(TF_DIR) fmt -check -recursive
+
+tf-validate:
+	terraform -chdir=$(TF_DIR) init -backend=false
+	terraform -chdir=$(TF_DIR) validate
+
+tf-plan:
+	terraform -chdir=$(TF_DIR) init $(TF_INIT_BACKEND_OPTS)
+	terraform -chdir=$(TF_DIR) plan $(TF_PLAN_ARGS)
