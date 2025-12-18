@@ -25,6 +25,12 @@ variable "eks_version" {
   default     = "1.30"
 }
 
+variable "eks_cluster_role_name" {
+  description = "Optional override for the IAM role name assumed by the EKS control plane (defaults to <cluster_name>-eks-role)"
+  type        = string
+  default     = null
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for the EKS VPC"
   type        = string
@@ -61,6 +67,12 @@ variable "enable_public_api_endpoint" {
   default     = true
 }
 
+variable "enable_private_api_endpoint" {
+  description = "Enable private access to the EKS API server within the VPC (true recommended; set false to disable)"
+  type        = bool
+  default     = true
+}
+
 variable "cluster_log_types" {
   description = "EKS control plane logs to enable"
   type        = list(string)
@@ -71,6 +83,12 @@ variable "node_group_name" {
   description = "Managed node group name"
   type        = string
   default     = "booking-ng"
+}
+
+variable "eks_node_role_name" {
+  description = "Optional override for the IAM role name assumed by worker nodes (defaults to <cluster_name>-node-role)"
+  type        = string
+  default     = null
 }
 
 variable "node_instance_types" {
