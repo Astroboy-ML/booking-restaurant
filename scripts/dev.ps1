@@ -123,13 +123,13 @@ try {
   # Get-NetTCPConnection peut ne pas être dispo (selon OS/permissions) : best effort
 }
 
-Write-Host "[dev] Lancement du front (npm run dev -- --host --port $WebPort --strictPort)..."
+Write-Host "[dev] Lancement du front (npm run dev)..."
 $webJob = Start-Job -ScriptBlock {
   param($port, $root, $apiUrl)
   $ErrorActionPreference = "Stop"
   $env:VITE_API_URL = $apiUrl
   Set-Location (Join-Path $root "apps/web")
-  npm run dev -- --host --port $port --strictPort
+  npm run dev
 } -ArgumentList $WebPort, $RepoRoot, "http://localhost:$ApiPort"
 
 Write-Host "[dev] URLs :" -ForegroundColor Green
