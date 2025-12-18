@@ -107,6 +107,21 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
+@app.get("/", tags=["meta"])
+async def root() -> dict:
+    """Landing endpoint to guide developers when hitting the base URL."""
+    return {
+        "message": "Booking Restaurant API is running.",
+        "docs": "http://localhost:8000/docs",
+        "health": "http://localhost:8000/health",
+        "reservations": {
+            "list": "GET /reservations",
+            "create": "POST /reservations",
+            "delete": "DELETE /reservations/{reservation_id}",
+        },
+    }
+
+
 class ReservationCreate(BaseModel):
     name: str = Field(min_length=1)
     date_time: datetime

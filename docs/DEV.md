@@ -103,6 +103,13 @@ Approche principale (DX) : DB dans Docker, API + front en local.
   - Front : http://localhost:5173 (VITE_API_URL pointant sur l'API)
   - DB : localhost:5432 (booking/booking)
 
+### Vérifier que tout répond
+- API : `curl http://localhost:8000/health` (OK attendu : `{ "status": "ok" }`).
+- Page d'accueil API (evite le 404) : `curl http://localhost:8000/` (renvoie un JSON avec les liens utiles et endpoints).
+- Front : ouvrir http://localhost:5173 (la page affiche "Booking Restaurant" et l'URL API en haut).
+- DB : ce port n'est pas HTTP ; tester avec `psql -h localhost -p 5432 -U booking -d booking -c "select 1"`.
+- Si la front-end affiche un 404, vérifiez que `npm install` a été exécuté et que le dev server tourne (logs visibles dans le terminal `make dev`).
+
 Option alternative (tout Docker) : `docker compose up --build api db adminer` (front non inclus dans compose aujourd'hui). Utile si vous ne voulez pas installer Python/Node localement, mais le flux principal reste l'option DB Docker + services locaux pour le DX.
 
 ### Appels API front (reservations)
