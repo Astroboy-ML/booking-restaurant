@@ -107,14 +107,29 @@ $apiJob = Start-Job -ScriptBlock {
   python -m uvicorn main:app --host 0.0.0.0 --port $port --reload
 } -ArgumentList $ApiPort, $env:DATABASE_URL, $RepoRoot
 
-# 5) Lancer le front
-Write-Host "[dev] Lancement du front (npm run dev -- --host --port $WebPort)..."
+# 5) Lancer le front (on s'assure que le port est libre)
+try {
+  $existing = Get-NetTCPConnection -LocalPort $WebPort -ErrorAction Stop
+  if ($existing) {
+    $pids = ($existing | Select-Object -ExpandProperty OwningProcess | Where-Object { $_ -gt 0 } | Sort-Object -Unique)
+    if ($pids.Count -gt 0) {
+      Write-Host "[dev] Port $WebPort occupé par PIDs $($pids -join ', '), arrêt forcé..." -ForegroundColor Yellow
+      foreach ($pid in $pids) {
+        try { taskkill /PID $pid /F | Out-Null } catch {}
+      }
+    }
+  }
+} catch {
+  # Get-NetTCPConnection peut ne pas être dispo (selon OS/permissions) : best effort
+}
+
+Write-Host "[dev] Lancement du front (npm run dev -- --host --port $WebPort --strictPort)..."
 $webJob = Start-Job -ScriptBlock {
   param($port, $root, $apiUrl)
   $ErrorActionPreference = "Stop"
   $env:VITE_API_URL = $apiUrl
   Set-Location (Join-Path $root "apps/web")
-  npm run dev -- --host --port $port
+  npm run dev -- --host --port $port --strictPort
 } -ArgumentList $WebPort, $RepoRoot, "http://localhost:$ApiPort"
 
 Write-Host "[dev] URLs :" -ForegroundColor Green
@@ -126,6 +141,6 @@ Write-Host "[dev] Arret : Ctrl+C (les jobs PowerShell seront termines)." -Foregr
 
 # Attendre les jobs et afficher leurs logs si un se termine
 Wait-Job $apiJob, $webJob
-Write-Host "[dev] Un des jobs s'est termine, logs :" -ForegroundColor Yellow
-Receive-Job $apiJob -Keep
-Receive-Job $webJob -Keep
+Write-Host "[dev] Un des jobs s'est terminé, logs :" -ForegroundColor Yellow
+Receive-Job $apiJob -Keep -ErrorAction SilentlyContinue
+Receive-Job $webJob -Keep -ErrorAction SilentlyContinue
