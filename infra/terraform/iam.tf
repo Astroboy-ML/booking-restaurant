@@ -1,3 +1,8 @@
+locals {
+  eks_cluster_role_name = coalesce(var.eks_cluster_role_name, "${var.cluster_name}-eks-role")
+  eks_node_role_name    = coalesce(var.eks_node_role_name, "${var.cluster_name}-node-role")
+}
+
 data "aws_iam_policy_document" "eks_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -10,11 +15,11 @@ data "aws_iam_policy_document" "eks_assume_role" {
 }
 
 resource "aws_iam_role" "eks_cluster" {
-  name               = "${var.cluster_name}-eks-role"
+  name               = local.eks_cluster_role_name
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 
   tags = merge(var.default_tags, {
-    Name = "${var.cluster_name}-eks-role"
+    Name = local.eks_cluster_role_name
   })
 }
 
@@ -40,11 +45,11 @@ data "aws_iam_policy_document" "eks_nodes_assume_role" {
 }
 
 resource "aws_iam_role" "eks_nodes" {
-  name               = "${var.cluster_name}-node-role"
+  name               = local.eks_node_role_name
   assume_role_policy = data.aws_iam_policy_document.eks_nodes_assume_role.json
 
   tags = merge(var.default_tags, {
-    Name = "${var.cluster_name}-node-role"
+    Name = local.eks_node_role_name
   })
 }
 
