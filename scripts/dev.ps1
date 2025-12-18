@@ -4,7 +4,8 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+# PSScriptRoot pointe sur .../scripts ; on remonte d'un cran pour le repo.
+$RepoRoot = Split-Path -Parent $PSScriptRoot
 
 function Ensure-PythonDeps {
   try {
