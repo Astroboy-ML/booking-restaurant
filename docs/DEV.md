@@ -38,6 +38,14 @@ Workflow simple avec deux modes : front en local (`make dev`) ou front dans Dock
 - Arret : `make dev-stop`
 - Reset complet : `make dev-reset` (supprime les volumes Postgres). Relancer ensuite le front local si necessaire.
 
+## Build & push ECR (API obligatoire, web optionnel)
+- Variables communes (local + CI) : `AWS_REGION`, `AWS_ACCOUNT_ID`, `ECR_REGISTRY=<account>.dkr.ecr.<region>.amazonaws.com`, `ECR_REPO_API` (ex: `booking-api`), `ECR_REPO_WEB` (optionnel), `IMAGE_TAG` (commit SHA, defaut: `git rev-parse --short HEAD`), `PUBLISH_LATEST` (true/false).
+- Login ECR (local) : `make ecr-login AWS_REGION=$AWS_REGION ECR_REGISTRY=$ECR_REGISTRY`
+- Build/push API : `make docker-build-api IMAGE_TAG=$IMAGE_TAG ECR_REGISTRY=$ECR_REGISTRY ECR_REPO_API=$ECR_REPO_API` puis `make docker-push-api ... PUBLISH_LATEST=true` si besoin.
+- Web (optionnel) : idem avec `docker-build-web` / `docker-push-web` et `ECR_REPO_WEB` defini.
+- CI GitHub : workflow `ecr-build.yml` build en PR, build+push sur `master` via OIDC/assume role (`secrets.AWS_ROLE_TO_ASSUME` + vars `AWS_REGION`, `AWS_ACCOUNT_ID`, `ECR_REPO_API`/`ECR_REPO_WEB`). Les images sont taggees avec le SHA (alias `latest` pousse sur `master`).
+- Troubleshooting : sans auth ECR, le login/push echoue (comportement attendu). Verifier les variables et le role OIDC avant de relancer.
+
 ## Protocole de test rapide
 1. `docker compose -f docker-compose.dev.yml ps` doit montrer `db`, `api`, `adminer` (et `web` si `dev-docker`).
 2. API : `curl http://localhost:8000/health` (endpoint present dans apps/api/main.py) puis `curl http://localhost:8000/docs` (ou navigateur).

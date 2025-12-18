@@ -1,0 +1,80 @@
+name: ecr-build
+
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "apps/web/**"
+      - "Makefile"
+      - ".github/workflows/ecr-build.yml"
+  push:
+    branches:
+      - master
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID || '000000000000' }}
+  ECR_REGISTRY: ${{ format('{0}.dkr.ecr.{1}.amazonaws.com', vars.AWS_ACCOUNT_ID || '000000000000', vars.AWS_REGION || 'us-east-1') }}
+  ECR_REPO_API: ${{ vars.ECR_REPO_API || 'booking-api' }}
+  ECR_REPO_WEB: ${{ vars.ECR_REPO_WEB }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image (tagged with commit SHA)
+        run: >
+          make docker-build-api
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+          ECR_REPO_API=${{ env.ECR_REPO_API }}
+
+      - name: Build web image (optional, only if repo defined)
+        if: env.ECR_REPO_WEB != ''
+        run: >
+          make docker-build-web
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+          ECR_REPO_WEB=${{ env.ECR_REPO_WEB }}
+
+      - name: Configure AWS credentials (push only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR (push only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: >
+          make ecr-login
+          AWS_REGION=${{ env.AWS_REGION }}
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+
+      - name: Push API image (push only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: >
+          make docker-push-api
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+          ECR_REPO_API=${{ env.ECR_REPO_API }}
+          PUBLISH_LATEST=true
+
+      - name: Push web image (optional, push only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && env.ECR_REPO_WEB != ''
+        run: >
+          make docker-push-web
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+          ECR_REPO_WEB=${{ env.ECR_REPO_WEB }}
+          PUBLISH_LATEST=true
