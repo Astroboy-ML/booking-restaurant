@@ -1,6 +1,7 @@
 param(
   [string]$ApiPort = "8000",
-  [string]$WebPort = "5173"
+  [string]$WebPort = "5173",
+  [int]$DbTimeoutSeconds = 90
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,17 +29,58 @@ print("ok")
   }
 }
 
-Write-Host "[dev] Demarrage de l'environnement..." -ForegroundColor Cyan
+function Invoke-Compose {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$Arguments
+  )
+
+  & docker compose @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "docker compose @Arguments a echoue avec le code $LASTEXITCODE"
+  }
+}
+
+function Wait-PostgresHealthy {
+  param([int]$TimeoutSeconds = 60)
+
+  $startTime = Get-Date
+  $containerId = $null
+
+  do {
+    $containerId = (& docker compose ps -q db).Trim()
+    if (-not $containerId) {
+      Start-Sleep -Seconds 2
+      continue
+    }
+
+    $status = (& docker inspect --format '{{.State.Health.Status}}' $containerId 2>$null).Trim()
+    if ($status -eq "healthy") {
+      Write-Host "[dev] Postgres est pret (healthy)." -ForegroundColor Green
+      return
+    }
+
+    Start-Sleep -Seconds 2
+  } while ((Get-Date) - $startTime -lt [TimeSpan]::FromSeconds($TimeoutSeconds))
+
+  throw "Postgres n'est pas healthy apres ${TimeoutSeconds}s"
+}
+
+Write-Host "[dev] Demarrage de l'environnement (DB + migrations + API + Web)..." -ForegroundColor Cyan
 
 # 1) Demarrer Postgres via docker compose
 Push-Location $RepoRoot
 Write-Host "[dev] Demarrage de la base (docker compose up -d db)..."
-docker compose up -d db
+Invoke-Compose -Arguments @("up", "-d", "db")
+Wait-PostgresHealthy -TimeoutSeconds $DbTimeoutSeconds
 
 # 2) Preparer DATABASE_URL si absente
 if (-not $env:DATABASE_URL) {
   $env:DATABASE_URL = "postgresql+psycopg://booking:booking@localhost:5432/booking"
-  Write-Host "[dev] DATABASE_URL non defini, utilisation de $env:DATABASE_URL"
+  Write-Host "[dev] DATABASE_URL non defini, utilisation de $env:DATABASE_URL" -ForegroundColor Yellow
+} elseif ($env:DATABASE_URL.StartsWith("postgresql://")) {
+  $env:DATABASE_URL = $env:DATABASE_URL.Replace("postgresql://", "postgresql+psycopg://", 1)
+  Write-Host "[dev] DATABASE_URL converti pour Alembic/SQLAlchemy -> $env:DATABASE_URL" -ForegroundColor Yellow
 }
 
 # 3) Appliquer les migrations
@@ -60,6 +102,7 @@ $apiJob = Start-Job -ScriptBlock {
   param($port, $dbUrl, $root)
   $ErrorActionPreference = "Stop"
   $env:DATABASE_URL = $dbUrl
+  $env:PYTHONPATH = (Join-Path $root "apps/api")
   Set-Location (Join-Path $root "apps/api")
   python -m uvicorn main:app --host 0.0.0.0 --port $port --reload
 } -ArgumentList $ApiPort, $env:DATABASE_URL, $RepoRoot
@@ -67,17 +110,19 @@ $apiJob = Start-Job -ScriptBlock {
 # 5) Lancer le front
 Write-Host "[dev] Lancement du front (npm run dev -- --host --port $WebPort)..."
 $webJob = Start-Job -ScriptBlock {
-  param($port, $root)
+  param($port, $root, $apiUrl)
   $ErrorActionPreference = "Stop"
+  $env:VITE_API_URL = $apiUrl
   Set-Location (Join-Path $root "apps/web")
   npm run dev -- --host --port $port
-} -ArgumentList $WebPort, $RepoRoot
+} -ArgumentList $WebPort, $RepoRoot, "http://localhost:$ApiPort"
 
 Write-Host "[dev] URLs :" -ForegroundColor Green
-Write-Host "  API : http://localhost:$ApiPort" -ForegroundColor Green
-Write-Host "  Web : http://localhost:$WebPort" -ForegroundColor Green
-Write-Host "  DB  : localhost:5432 (user=booking password=booking db=booking)" -ForegroundColor Green
-Write-Host "[dev] Arret : Ctrl+C puis nettoyer les jobs PowerShell si necessaire (Get-Job | Remove-Job)." -ForegroundColor Green
+Write-Host "  API      : http://localhost:$ApiPort" -ForegroundColor Green
+Write-Host "  API docs : http://localhost:$ApiPort/docs" -ForegroundColor Green
+Write-Host "  Web      : http://localhost:$WebPort" -ForegroundColor Green
+Write-Host "  DB       : localhost:5432 (user=booking password=booking db=booking)" -ForegroundColor Green
+Write-Host "[dev] Arret : Ctrl+C (les jobs PowerShell seront termines)." -ForegroundColor Green
 
 # Attendre les jobs et afficher leurs logs si un se termine
 Wait-Job $apiJob, $webJob
