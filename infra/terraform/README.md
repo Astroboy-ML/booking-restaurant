@@ -41,6 +41,25 @@ terraform plan -input=false
 - Logs : `cluster_log_types` (api, audit par défaut).
 - NAT : `enable_nat_gateway=false` par défaut pour éviter les coûts ; à activer si les nœuds privés ont besoin d’egress.
 
+#### Variables principales (réseau, sizing, rôles)
+| Variable | Description | Exemple / défaut |
+| --- | --- | --- |
+| `aws_region` | Région AWS ciblée | `eu-west-3` |
+| `cluster_name` | Nom du cluster et préfixe pour les ressources | `booking-eks-dev` |
+| `eks_version` | Version EKS | `1.30` |
+| `vpc_cidr` | CIDR du VPC | `10.10.0.0/16` |
+| `azs` | Liste des AZ utilisées (ordre = subnets) | `["eu-west-3a", "eu-west-3b"]` |
+| `public_subnets_cidrs` / `private_subnets_cidrs` | CIDR des subnets publics/privés alignés sur `azs` | `["10.10.0.0/20", ...]` |
+| `enable_nat_gateway` | Active un NAT pour les subnets privés (coûts) | `false` par défaut |
+| `enable_public_api_endpoint` | API EKS publique (true) ou privée uniquement (false) | `true` |
+| `cluster_log_types` | Logs control plane activés | `["api", "audit"]` |
+| `node_group_name` | Nom du node group managé | `booking-ng-dev` |
+| `node_instance_types` | Types d’instances des nœuds | `["t3.small"]` |
+| `node_desired_capacity` / `node_min_size` / `node_max_size` | Autoscaling du node group | `2 / 1 / 3` |
+| `cluster_tags` | Tags additionnels appliqués aux ressources | `{ environment = "dev" }` |
+
+> Aucun ARN ou secret n’est codé en dur : les rôles IAM utilisent des policies managées et doivent être assumés via vos credentials/assume-role au moment du plan.
+
 ### Via Makefile (depuis la racine)
 ```sh
 make tf-fmt
