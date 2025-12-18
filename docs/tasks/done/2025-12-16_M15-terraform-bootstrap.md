@@ -5,8 +5,8 @@ type: feature
 area: devops
 agents_required: [devops]
 depends_on: []
-validated_by:
-validated_at:
+validated_by: "marti"
+validated_at: "2025-12-18"
 ---
 
 ## Contexte

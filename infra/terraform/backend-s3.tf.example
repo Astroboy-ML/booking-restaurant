@@ -1,0 +1,12 @@
+terraform {
+  # Remote backend (S3 + DynamoDB locking) — configure via -backend-config flags
+  backend "s3" {}
+}
+
+# Suggested flags (do NOT commit secrets/ARNs):
+# terraform init \
+#   -backend-config="bucket=<bucket>" \
+#   -backend-config="region=<region>" \
+#   -backend-config="dynamodb_table=<lock-table>" \
+#   -backend-config="encrypt=true" \
+#   -backend-config="workspace_key_prefix=booking-restaurant"

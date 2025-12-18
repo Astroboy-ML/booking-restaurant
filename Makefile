@@ -1,12 +1,15 @@
 POWERSHELL ?= powershell
 DEV_COMPOSE = docker-compose.dev.yml
 
-.PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision dev dev-docker dev-stop dev-reset
+.PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision dev dev-docker dev-stop dev-reset tf-fmt tf-validate tf-plan
 
-TF_DIR := infra/terraform
+TF ?= terraform
+TF_DIR ?= infra/terraform
 TF_BACKEND_BUCKET ?=
 TF_BACKEND_REGION ?=
 TF_BACKEND_DYNAMODB_TABLE ?=
+TF_BACKEND_CONFIG ?= -backend=false
+TF_INIT_FLAGS ?= -reconfigure
 TF_INIT_BACKEND_OPTS := $(if $(TF_BACKEND_BUCKET),-backend-config="bucket=$(TF_BACKEND_BUCKET)") $(if $(TF_BACKEND_REGION),-backend-config="region=$(TF_BACKEND_REGION)") $(if $(TF_BACKEND_DYNAMODB_TABLE),-backend-config="dynamodb_table=$(TF_BACKEND_DYNAMODB_TABLE)")
 TF_PLAN_ARGS ?=
 
@@ -63,12 +66,12 @@ dev-reset:
 	@echo "Front URL: http://localhost:5173"
 
 tf-fmt:
-	terraform -chdir=$(TF_DIR) fmt -check -recursive
+	$(TF) -chdir=$(TF_DIR) fmt -check
 
 tf-validate:
-	terraform -chdir=$(TF_DIR) init -backend=false
-	terraform -chdir=$(TF_DIR) validate
+	$(TF) -chdir=$(TF_DIR) init $(if $(TF_BACKEND_BUCKET)$(TF_BACKEND_REGION)$(TF_BACKEND_DYNAMODB_TABLE),$(TF_INIT_BACKEND_OPTS),$(TF_BACKEND_CONFIG)) $(TF_INIT_FLAGS)
+	$(TF) -chdir=$(TF_DIR) validate
 
 tf-plan:
-	terraform -chdir=$(TF_DIR) init $(TF_INIT_BACKEND_OPTS)
-	terraform -chdir=$(TF_DIR) plan $(TF_PLAN_ARGS)
+	$(TF) -chdir=$(TF_DIR) init $(if $(TF_BACKEND_BUCKET)$(TF_BACKEND_REGION)$(TF_BACKEND_DYNAMODB_TABLE),$(TF_INIT_BACKEND_OPTS),$(TF_BACKEND_CONFIG)) $(TF_INIT_FLAGS)
+	$(TF) -chdir=$(TF_DIR) plan -input=false $(TF_PLAN_ARGS)

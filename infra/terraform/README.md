@@ -1,50 +1,56 @@
-# Terraform bootstrap
+## Terraform bootstrap
 
-Base Terraform pour AWS, sans creation de ressources. Cette configuration se contente de verrouiller les versions (Terraform 1.8, provider AWS 5.x) et expose un backend S3 parametrable pour preparer les travaux ECR/EKS.
+Ossature Terraform AWS sans création de ressources. Compatible avec `terraform init -backend=false` pour le travail local, et backend S3 activable via `-backend-config` (ou variables Makefile).
 
-## Prerequis
-- Terraform 1.8+
-- Acces AWS par OIDC ou variables d'environnement standard (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`), uniquement pour les commandes ayant besoin du provider.
-- Aucun secret ou ARN ne doit etre committe. Fournir les valeurs via l'environnement ou un fichier backend local.
+### Prérequis
+- Terraform >= 1.6
+- Auth AWS via SSO/OIDC/env (`AWS_PROFILE`, `AWS_REGION`, ou clés temporaires) ; aucun secret/ARN dans le dépôt
+- Accès réseau vers le registry Terraform pour télécharger les providers
 
-## Backend S3 parametrable
-Le bloc backend est volontairement vide et doit etre renseigne au moment du `terraform init` via `-backend-config`. Exemple de fichier `backend.example.hcl` :
+### Structure
+- `versions.tf` : contrainte Terraform + provider AWS
+- `providers.tf` : provider AWS (région via variable)
+- `backend.tf` : placeholder local (backend désactivé par défaut)
+- `backend-s3.tf.example` : squelette backend S3 à copier/utiliser avec `-backend-config`
+- `backend.example.hcl` : exemple HCL pour `terraform init -backend-config=backend.example.hcl`
+- `variables.tf` : variables régionales/backend
+- `outputs.tf` : sortie de la région active
 
-```hcl
-bucket         = "<your-s3-bucket>"
-key            = "terraform.tfstate"
-region         = "<aws-region>"
-dynamodb_table = "<optional-dynamodb-table>"
-encrypt        = true
+### Commandes Terraform
+```sh
+cd infra/terraform
+terraform init -backend=false
+terraform fmt -check
+terraform validate
 ```
 
-Appliquer le fichier :
+Plan (sans apply) avec backend distant :
+```sh
+terraform init \
+  -backend-config="bucket=<bucket>" \
+  -backend-config="region=<region>" \
+  -backend-config="dynamodb_table=<table>"
 
-```bash
-terraform -chdir=infra/terraform init -backend-config=backend.example.hcl
+terraform plan -input=false
 ```
 
-Pour un travail purement local (fmt/validate), preferer :
+### Via Makefile (depuis la racine)
+```sh
+make tf-fmt
+make tf-validate          # init -backend=false par défaut
+make tf-plan              # init -backend=false par défaut
 
-```bash
-terraform -chdir=infra/terraform init -backend=false
-```
-
-## Variables exposes
-- `aws_region` : region AWS (defaut `eu-west-3`).
-- `default_tags` : tags par defaut ajoutes aux ressources eventuelles.
-
-## Commandes utiles
-- `make tf-fmt` : `terraform fmt -check` dans `infra/terraform`.
-- `make tf-validate` : `terraform init -backend=false` puis `terraform validate`.
-- `make tf-plan` : `terraform init` (backend configurable via variables d'environnement) puis `terraform plan`.
-
-### Exemple de plan sans appliquer
-```bash
-TF_BACKEND_BUCKET=my-tfstate-bucket \
+# Activer un backend S3 (variables Makefile)
+TF_BACKEND_BUCKET=my-bucket \
 TF_BACKEND_REGION=eu-west-3 \
 TF_BACKEND_DYNAMODB_TABLE=tf-locks \
-make tf-plan TF_PLAN_ARGS="-out=plan.tfplan"
+make tf-plan
+
+# Ou passer directement une config backend personnalisée
+TF_BACKEND_CONFIG='-backend-config="bucket=<bucket>" -backend-config="region=<region>"' \
+make tf-plan
 ```
 
-Cette sequence reste sans effet sur AWS tant qu'aucun `terraform apply` n'est lance.
+### Notes
+- Aucun nom de bucket/ARN/secrets en dur ; toujours passer via variables ou `-backend-config`.
+- Pas de cible `apply` exposée dans ce ticket.
