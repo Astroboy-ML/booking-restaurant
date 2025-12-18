@@ -3,6 +3,8 @@ DEV_COMPOSE = docker-compose.dev.yml
 
 .PHONY: web-lint web-test web-build api-lint api-test api-migrate api-migrate-revision dev dev-docker dev-stop dev-reset tf-fmt tf-validate tf-plan ecr-login docker-build-api docker-push-api docker-build-web docker-push-web
 
+export DOCKER_BUILDKIT ?= 1
+
 TF ?= terraform
 TF_DIR ?= infra/terraform
 TF_BACKEND_BUCKET ?=
@@ -94,7 +96,7 @@ ecr-login:
 docker-build-api:
 	$(if $(ECR_REGISTRY),,$(error ECR_REGISTRY is required for API image tagging))
 	$(if $(ECR_REPO_API),,$(error ECR_REPO_API is required))
-	DOCKER_BUILDKIT=1 docker build -f apps/api/Dockerfile -t $(API_IMAGE):$(IMAGE_TAG) .
+	docker build -f apps/api/Dockerfile -t $(API_IMAGE):$(IMAGE_TAG) apps/api
 
 docker-push-api:
 	$(if $(ECR_REGISTRY),,$(error ECR_REGISTRY is required for API image pushing))
@@ -108,7 +110,7 @@ endif
 docker-build-web:
 	$(if $(ECR_REGISTRY),,$(error ECR_REGISTRY is required for web image tagging))
 	$(if $(ECR_REPO_WEB),,$(error ECR_REPO_WEB is required for web image tagging))
-	DOCKER_BUILDKIT=1 docker build -f apps/web/Dockerfile -t $(WEB_IMAGE):$(IMAGE_TAG) .
+	docker build -f apps/web/Dockerfile -t $(WEB_IMAGE):$(IMAGE_TAG) apps/web
 
 docker-push-web:
 	$(if $(ECR_REGISTRY),,$(error ECR_REGISTRY is required for web image pushing))
