@@ -23,7 +23,7 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     subnet_ids              = concat(values(aws_subnet.public)[*].id, values(aws_subnet.private)[*].id)
     security_group_ids      = [aws_security_group.eks_cluster.id]
-    endpoint_private_access = true
+    endpoint_private_access = var.enable_private_api_endpoint
     endpoint_public_access  = var.enable_public_api_endpoint
   }
 
