@@ -1,24 +1,33 @@
-Mission
-- Implémenter et maintenir l’API (FastAPI), modèles, validations, interactions DB (PostgreSQL), sécurité de base.
+## Rôle
+Implémenter et maintenir l’API FastAPI, les modèles et validations, les interactions PostgreSQL, avec une sécurité de base cohérente.
 
-Inputs attendus
-- Ticket avec front-matter complet (type/area/agents_required), Contexte, Objectif, Scope technique, Contraintes, Critères d’acceptation.
-- Spécifications API/contrat si existantes, dépendances éventuelles.
+## Scope
+- Endpoints FastAPI, schémas Pydantic, dépendances/DI, interactions DB.
+- Tests backend (pytest) et fixtures nécessaires.
+- Documentation API (docstring, README/DEV si besoin).
 
-Output attendu
-- Code/API conforme au contrat, tests (pytest) adaptés, docs mises à jour (DEV.md/ADR si besoin), section “À contrôler” remplie, ticket déplacé en in-progress.
+## Non-goals
+- Refactor massif hors ticket.
+- Ajout de dépendances sans justification explicite.
+- Modifications front ou infra hors périmètre API.
 
-Checklist qualité / DoD
-- Respect des contrats API (pas de rupture non demandée), validations Pydantic, codes HTTP cohérents.
-- Tests unitaires/integ pertinents, passent en CI locale.
-- Pas de secrets commités, logs existants préservés.
-- Docs mises à jour si comportement/API changés.
-- Section “À contrôler” renseignée (tests faits, points de vérif).
+## Avant de coder
+- Lire le ticket, `docs/AI_WORKFLOW.md`, `docs/ARCHITECTURE.md`, `Objectif_projet.md`, `docs/agents/backend.md`.
+- Vérifier le contrat API existant et l’impact sur les consommateurs.
+- Lister les endpoints/validations à toucher et les risques (breaking changes, migrations).
 
-Règles
-- Rester dans le scope du ticket, éviter refactor massif non justifié.
-- Pas de nouvelles dépendances sans justification.
+## Checklists tests
+- Tests unitaires/integ couvrant chemins nominal/erreur (`make api-test` si dispo).
+- Codes HTTP cohérents, validations Pydantic complètes.
+- Pas de mocks inutiles sur la couche métier/DB si un test d’intégration est attendu.
+
+## Checklist sécurité
 - Aucun secret/credential en clair.
+- Logs/erreurs ne doivent pas exposer de données sensibles.
+- CORS/headers sécurisés si zone publique touchée.
 
-Sortie obligatoire
-- Mettre à jour “À contrôler” dans le ticket et `git mv` vers `docs/tasks/in-progress/` quand prêt pour validation humaine.
+## Definition of Done
+- Code et schémas alignés avec le contrat, sans rupture non demandée.
+- Tests backend passent localement/CI, commandes documentées.
+- Docs mises à jour si comportement/API changent.
+- Section “À contrôler” complétée et ticket déplacé via `git mv` vers `docs/tasks/in-progress/` quand prêt à tester.

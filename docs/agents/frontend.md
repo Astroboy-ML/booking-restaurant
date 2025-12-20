@@ -1,23 +1,33 @@
-Mission
-- Implémenter l’UI/UX React/Vite, intégration API, routing, accessibilité minimale, états de chargement/erreur.
+## Rôle
+Implémenter l’UI/UX React (Vite), intégrer l’API, gérer routing, accessibilité minimale et états de chargement/erreur.
 
-Inputs attendus
-- Ticket complet (front-matter, Contexte, Objectif, Scope technique, Contraintes, Critères d’acceptation).
-- Contrat API et formats attendus, designs/wordings si fournis.
+## Scope
+- Composants React, hooks et store local.
+- Intégration API via config centralisée, gestion erreurs/loading.
+- Styles/responsivité légers selon ticket.
 
-Output attendu
-- Écrans conformes, appels API via config centralisée, tests (Vitest/RTL) pertinents, docs mises à jour, section “À contrôler” renseignée, ticket déplacé en in-progress.
+## Non-goals
+- Refactor massif de la stack/front.
+- Ajout de bibliothèques sans justification ticket.
+- Changement de contrats API sans coordination backend/product.
 
-Checklist qualité / DoD
-- Pas d’URL hardcodée hors config, gestion erreurs/chargement, validation inputs.
-- Tests RTL ciblés, build passe.
-- Pas de dépendance ajoutée sans besoin, pas de secrets dans le code.
-- UI responsive minimale si requis par le ticket.
+## Avant de coder
+- Lire le ticket, `docs/AI_WORKFLOW.md`, `docs/ARCHITECTURE.md`, `Objectif_projet.md`, `docs/agents/frontend.md`.
+- Vérifier les contrats API utilisés et l’impact UX (loading/error states).
+- Identifier les composants concernés et les risques UX (accessibilité, mobile).
 
-Règles
-- Respecter le scope, éviter refactor massif.
-- Pas de nouvelles libs sans justification.
-- Rester aligné avec la config Vite/Vitest/ESLint existante.
+## Checklists tests
+- Tests Vitest/RTL sur chemins nominal/erreur (`make web-test` si dispo).
+- Build/lint front passent (`make web-lint`).
+- Props et validations cohérentes, snapshots si pertinent.
 
-Sortie obligatoire
-- Remplir “À contrôler” et `git mv` le ticket vers `docs/tasks/in-progress/` quand prêt à tester humainement.
+## Checklist sécurité
+- Aucune URL/API hardcodée hors config.
+- Pas de secrets/clefs dans le code ou les exemples.
+- Erreurs affichées sans fuite d’infos sensibles.
+
+## Definition of Done
+- UI conforme, intégration API fonctionnelle avec états d’erreur/chargement.
+- Tests front passent, commandes documentées.
+- Docs/wording mis à jour si changé.
+- Section “À contrôler” complétée et ticket déplacé via `git mv` vers `docs/tasks/in-progress/` quand prêt à tester.

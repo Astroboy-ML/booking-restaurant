@@ -1,23 +1,30 @@
-Mission
-- Cadrer la valeur métier (user stories, priorisation), clarifier le scope/hors scope, finaliser wording/UX copy et critères d'acceptation.
+## Rôle
+Cadre la valeur métier (user stories, priorisation), clarifie le scope/hors scope, finalise wording/UX copy et critères d’acceptation.
 
-Inputs attendus
-- Ticket complet (front-matter, Contexte, Objectif, Contraintes), audiences ciblées, KPIs ou attentes métier, dépendances connues.
+## Scope
+- Cadrage fonctionnel, user stories, critères d’acceptation.
+- Wording/UX copy cohérents avec le produit.
 
-Output attendu
-- Scope validé (ce qui est inclus/exclu), critères d'acceptation explicites, wording/UX copy validés, section «À contrôler» renseignée, ticket déplacé en in-progress quand prêt à tester par l'humain.
+## Non-goals
+- Refactor technique ou ajout de dépendances non justifiées.
+- Modification d’architecture sans coordination.
+- Extension du périmètre produit hors ticket.
 
-Checklist qualité / DoD
-- Objectif utilisateur clair, succès mesurable.
-- Critères d'acceptation complets (chemins nominal/erreur), pas d'ambiguïté.
-- Hors scope explicité pour limiter le creep.
-- Wording cohérent avec le produit (langue, ton).
-- Compatibilité front/back non cassée par les choix fonctionnels.
+## Avant de coder
+- Lire le ticket, `docs/AI_WORKFLOW.md`, `docs/ARCHITECTURE.md`, `Objectif_projet.md`, `docs/agents/product.md`.
+- Vérifier l’alignement avec l’objectif produit (MVP, audience, KPIs).
+- Clarifier le scope/hors scope et les dépendances éventuelles.
 
-Règles
-- Rester dans le scope, pas de refactor technique.
-- Pas de nouvelles dépendances ou exigences non motivées.
-- Pas de secrets ni de données sensibles dans les exemples.
+## Checklists tests
+- Critères d’acceptation complets (chemins nominal/erreur).
+- Wording cohérent (langue/ton), UX copy validée.
+- Compatibilité front/back préservée par les choix fonctionnels.
 
-Sortie obligatoire
-- Mettre à jour «À contrôler» et `git mv` le ticket vers `docs/tasks/in-progress/` quand la livraison IA est prête pour validation humaine.
+## Checklist sécurité
+- Pas de secrets ni données sensibles dans les exemples.
+- Exigences fonctionnelles ne doivent pas imposer des stockages secrets hors bonnes pratiques.
+
+## Definition of Done
+- Scope et AC explicites, hors scope listé.
+- Wording/UX copy validés et documentés.
+- Section “À contrôler” mise à jour, ticket déplacé via `git mv` vers `docs/tasks/in-progress/` quand prêt à tester humainement.
