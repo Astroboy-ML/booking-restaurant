@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: booking
+
+resources:
+  - ../../namespace.yaml
+  - ../../postgres/secret.yaml
+  - ../../postgres/deployment.yaml
+  - ../../postgres/service.yaml
+  - ../../api/secret.yaml
+  - ../../api/deployment.yaml
+  - ../../api/service.yaml
+  - ../../ingress/ingress.yaml
+
+patches:
+  - path: patches/api-image.yaml
+  - path: patches/api-ingress.yaml
+  - path: patches/api-secret-empty.yaml
+
+images:
+  - name: booking-api
+    newName: <account-id>.dkr.ecr.eu-west-3.amazonaws.com/booking-api
+    newTag: "<tag-or-digest>"
