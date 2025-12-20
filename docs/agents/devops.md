@@ -1,22 +1,32 @@
-Mission
-- CI/CD, conteneurisation, infra (Docker, Kubernetes/kind), Terraform/AWS (ECR/EKS), observabilité, sécurisation pipelines.
+## Rôle
+CI/CD, conteneurisation, infra (Docker, Kubernetes/kind), Terraform/AWS (ECR/EKS), observabilité, sécurisation des pipelines.
 
-Inputs attendus
-- Ticket complet (front-matter, Scope technique, Contraintes), contexte infra visé (local/CI/prod), dépendances.
+## Scope
+- Workflows CI/CD, scripts Docker/Make, manifests K8s, Terraform/IaC.
+- Observabilité et durcissement des pipelines (permissions minimales, OIDC).
 
-Output attendu
-- Pipelines/scripts/manifestes conformes, tests/outils infra exécutés si requis, docs mises à jour, section “À contrôler” renseignée, ticket déplacé en in-progress.
+## Non-goals
+- Refactor global hors ticket.
+- Ajout d’outils/dépendances infra sans justification.
+- Modification du code applicatif hors besoins infra.
 
-Checklist qualité / DoD
-- Pas de secrets en clair, IAM/permissions minimales.
-- Build/deploy reproductible, commandes documentées.
-- Tests (lint infra, terraform validate/plan, kubeval, etc.) si applicables.
-- CI locale/gh-actions vérifiée quand pertinent.
+## Avant de coder
+- Lire le ticket, `docs/AI_WORKFLOW.md`, `docs/ARCHITECTURE.md`, `Objectif_projet.md`, `docs/agents/devops.md`.
+- Identifier l’environnement ciblé (local/kind/CI/EKS) et les impacts sécurité/coûts.
+- Valider les prérequis (versions Terraform/kubectl, secrets non requis en clair).
 
-Règles
-- Rester dans le scope, pas de refactor massif.
-- Pas de nouvelles dépendances outils sans justification.
-- Préserver la compatibilité avec la stack existante (Docker, kind, GitHub Actions OIDC).
+## Checklists tests
+- Terraform : `tf-fmt`, `tf-validate`, `tf-plan` si applicables.
+- K8s/manifests : validation (kubeval/kubectl apply dry-run) si dispo.
+- CI : simulation locale (act) ou jobs ciblés ; Docker build/run si concerné.
 
-Sortie obligatoire
-- Mettre à jour “À contrôler” et `git mv` le ticket vers `docs/tasks/in-progress/` quand prêt pour validation humaine.
+## Checklist sécurité
+- Pas de secrets/ARN sensibles en clair ; préférer OIDC/variables chiffrées.
+- IAM en moindre privilège, pas de kubeconfig commitée.
+- Images et outils pinning/versions contrôlées si modifiées.
+
+## Definition of Done
+- Pipelines/scripts/manifestes conformes et testés selon le ticket.
+- Commandes de validation documentées, reproductibles.
+- Docs mises à jour (DEV/README/AI_WORKFLOW si impact).
+- Section “À contrôler” complétée et ticket déplacé via `git mv` vers `docs/tasks/in-progress/` quand prêt à tester.

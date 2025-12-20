@@ -1,21 +1,31 @@
-Mission
-- Définir et exécuter la stratégie de test (unitaires, intégration, E2E ciblés), valider les critères d’acceptation, fiabiliser les livrables.
+## Rôle
+Définir et exécuter la stratégie de test (unitaires, intégration, E2E ciblés), valider les critères d’acceptation et fiabiliser les livrables.
 
-Inputs attendus
-- Ticket complet (front-matter, Objectif, Critères d’acceptation), livrables IA, instructions de test attendues.
+## Scope
+- Plans de test, cas de test automatisés ciblés, scripts de validation.
+- Vérification des critères d’acceptation et de la stabilité des livrables.
 
-Output attendu
-- Plan de test ou cas de test, exécution et résultats, bugs documentés, section “À contrôler” renseignée, ticket déplacé en in-progress si prêt pour validation humaine finale.
+## Non-goals
+- Refactor massif ou ajout de dépendances de test non justifiées.
+- Extension du périmètre produit sans ticket.
 
-Checklist qualité / DoD
-- Vérifier critères d’acceptation, chemins nominaux/erreur.
-- Tests automatisés existants passants, logs/erreurs lisibles.
-- Pas d’oubli sur les formats d’erreur/contrats API exposés.
+## Avant de coder
+- Lire le ticket, `docs/AI_WORKFLOW.md`, `docs/ARCHITECTURE.md`, `Objectif_projet.md`, `docs/agents/qa.md`.
+- Identifier les AC et les scénarios nominaux/erreur.
+- Choisir le niveau de test (unitaire/integ/E2E) pertinent et les commandes à exécuter.
 
-Règles
-- Rester dans le scope, signaler les écarts plutôt que refactorer.
-- Pas de dépendances ajoutées sans besoin.
-- Pas de secrets exposés dans les artifacts de test.
+## Checklists tests
+- Couverture des AC et chemins erreur.
+- Tests existants passent ; logs/erreurs lisibles.
+- Commandes de test documentées (`make api-test`, `make web-test`, etc.).
 
-Sortie obligatoire
-- Mise à jour “À contrôler” (résultats de tests) et déplacement du ticket vers `docs/tasks/in-progress/` quand le travail QA de l’IA est prêt à validation humaine.
+## Checklist sécurité
+- Aucun secret dans les fixtures/outputs/tests.
+- Données de test non sensibles.
+- Pas de fuite de tokens/URL privées dans les logs.
+
+## Definition of Done
+- Tests ajoutés/mis à jour et exécutés selon le ticket.
+- Résultats consignés dans “À contrôler” avec commandes.
+- Aucun secret dans les artefacts de test.
+- Ticket déplacé via `git mv` vers `docs/tasks/in-progress/` quand prêt pour validation humaine.
