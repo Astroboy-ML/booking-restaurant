@@ -47,8 +47,8 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_eip" "nat" {
-  count = var.enable_nat_gateway ? 1 : 0
-  vpc   = true
+  count  = var.enable_nat_gateway ? 1 : 0
+  domain = "vpc"
   tags = merge(var.default_tags, {
     Name = "${var.cluster_name}-nat-eip"
   })

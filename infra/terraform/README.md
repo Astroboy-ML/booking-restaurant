@@ -1,48 +1,58 @@
 ## Terraform bootstrap
 
-Ossature Terraform AWS sans création de ressources par défaut. Backend local par défaut (désactivable avec `-backend=false`), backend S3/DynamoDB activable via `-backend-config` ou variables Makefile.
+Ossature Terraform AWS sans création de ressources par défaut. Backend distant optionnel (S3/Dynamo) via fichier non commité ou variables Makefile ; mode local utilisable sans backend.
 
 ### Prérequis
 - Terraform >= 1.6
-- Auth AWS via SSO/OIDC/env (`AWS_PROFILE`, `AWS_REGION`, ou clés temporaires) ; aucun secret/ARN dans le dépôt
-- Accès réseau au registry Terraform pour télécharger les providers
+- Auth AWS via profil local (ex: `booking-dev`) ; aucun secret/ARN dans le depot
+- Acces reseau au registry Terraform pour telecharger les providers
+
+### Authentification AWS (profil local)
+Profil attendu pour les tests locaux : `booking-dev` (non-SSO).
+```sh
+aws configure --profile booking-dev
+aws sts get-caller-identity --profile booking-dev
+```
+En PowerShell, exporter la session de test :
+```ps1
+$env:AWS_PROFILE="booking-dev"
+$env:AWS_REGION="eu-west-3"
+$env:AWS_DEFAULT_REGION="eu-west-3"
+aws sts get-caller-identity
+```
+> Ne pas committer de fichiers credentials ; utiliser uniquement le profil local.
 
 ### Structure
 - `versions.tf` : contrainte Terraform + provider AWS
 - `providers.tf` : provider AWS (région via variable)
-- `backend.tf` / `backend-s3.tf.example` / `backend.example.hcl` : backend local ou S3 configuré via flags
 - `variables.tf` : variables régionales + EKS/VPC/nodegroup + rôles IAM
 - `vpc.tf`, `iam.tf`, `eks.tf` : VPC/subnets/IGW (NAT optionnel), rôles IAM, cluster EKS + node group
 - `outputs.tf` : région, cluster, VPC/subnets, rôle nodegroup
 - `examples/eks-dev.tfvars` : exemple tfvars (aucun secret)
+- `examples/backend.s3.hcl.example` : exemple backend S3 optionnel (à copier hors Git)
 
-### Commandes de base
+### Commandes de base (local, sans backend distant)
 ```sh
 cd infra/terraform
-# Backend local désactivé :
-terraform init -backend=false
-
-# Mise en forme / validation
+terraform init -backend=false -reconfigure
 terraform fmt -recursive
 terraform validate
-
-# Plan avec un tfvars spécifique (sans backend distant)
 terraform plan -var-file=examples/eks-dev.tfvars
 ```
 
-Plan (sans apply) avec backend distant sécurisé :
+Backend S3/Dynamo optionnel (fichier non commité) :
 ```sh
-terraform init \
-  -backend-config="bucket=<bucket>" \
-  -backend-config="region=<region>" \
-  -backend-config="dynamodb_table=<table>"
-
-terraform plan -input=false -var-file=<env>.tfvars
+cd infra/terraform
+cp examples/backend.s3.hcl.example backend.s3.hcl
+terraform init -reconfigure -backend-config=backend.s3.hcl
+terraform plan -var-file=examples/eks-dev.tfvars
 ```
+
+Astuce : si vous voyez “Backend initialization required”, supprimez `.terraform/` puis relancez `terraform init -backend=false -reconfigure`.
 
 ### EKS skeleton (cluster + nodegroup + VPC)
 - Variables clés : `cluster_name`, `eks_version`, `vpc_cidr`, `azs`, `public_subnets_cidrs`, `private_subnets_cidrs`, `enable_nat_gateway` (coûts), `enable_private_api_endpoint`, `enable_public_api_endpoint`, `node_instance_types`, `node_desired_capacity`/`min_size`/`max_size`, `eks_cluster_role_name` / `eks_node_role_name`, `cluster_tags`.
-- Exemple : `examples/eks-dev.tfvars` (région eu-west-3, VPC 10.10.0.0/16, 2 AZs, NAT désactivé par défaut, endpoint public configurable).
+- Exemple : `examples/eks-dev.tfvars` (région eu-west-3, VPC 10.10.0.0/16, 3 AZs, NAT désactivé par défaut, endpoint public configurable).
 - IAM : rôles EKS/NodeGroup avec politiques gérées (cluster, VPC controller, worker, CNI, ECR read-only) ; noms overridables par variables.
 - Logs : `cluster_log_types` (api, audit par défaut).
 - NAT : `enable_nat_gateway=false` par défaut pour éviter les coûts ; à activer si les nœuds privés ont besoin d’egress.
@@ -56,8 +66,8 @@ terraform plan -input=false -var-file=<env>.tfvars
 | `eks_version` | Version EKS | `1.30` |
 | `eks_cluster_role_name` | Nom IAM du rôle control plane (override) | `booking-eks-dev-eks-role` par défaut si non fourni |
 | `vpc_cidr` | CIDR du VPC | `10.10.0.0/16` |
-| `azs` | Liste des AZ utilisées (ordre = subnets) | `["eu-west-3a", "eu-west-3b"]` |
-| `public_subnets_cidrs` / `private_subnets_cidrs` | CIDR des subnets publics/privés alignés sur `azs` | `["10.10.0.0/20", "10.10.16.0/20"]` |
+| `azs` | Liste des AZ utilisées (ordre = subnets) | `["eu-west-3a", "eu-west-3b", "eu-west-3c"]` |
+| `public_subnets_cidrs` / `private_subnets_cidrs` | CIDR des subnets publics/privés alignés sur `azs` | `["10.10.0.0/20", "10.10.16.0/20", "10.10.32.0/20"]` |
 | `enable_nat_gateway` | Active un NAT pour les subnets privés (coûts) | `false` par défaut |
 | `enable_private_api_endpoint` | API EKS accessible en privé dans le VPC | `true` |
 | `enable_public_api_endpoint` | API EKS publique (true) ou privée uniquement (false) | `true` |
@@ -73,10 +83,10 @@ terraform plan -input=false -var-file=<env>.tfvars
 ### Via Makefile (depuis la racine)
 ```sh
 make tf-fmt
-make tf-validate          # init -backend=false + validate
-make tf-plan              # init -backend=false par défaut
+make tf-validate          # init -backend=false -reconfigure + validate (local)
+make tf-plan              # init -backend=false -reconfigure + plan (local)
 
-# Backend S3 (exemple)
+# Backend S3 via variables d'env
 TF_BACKEND_BUCKET=my-bucket \
 TF_BACKEND_REGION=eu-west-3 \
 TF_BACKEND_DYNAMODB_TABLE=tf-locks \

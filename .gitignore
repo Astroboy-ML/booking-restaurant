@@ -4,3 +4,9 @@ __pycache__/
 node_modules/
 dist/
 apps/web/.env
+.terraform/
+infra/terraform/backend.s3.hcl
+infra/terraform/*.override.tf
+*.tfstate*
+crash.log
+infra/terraform/*_override.tf
